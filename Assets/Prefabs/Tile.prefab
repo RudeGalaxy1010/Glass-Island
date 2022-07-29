@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _shift: {x: 0, y: -0.05, z: 0}
   _speed: 0.5
+  _extinctTime: 2
+  _tileColldier: {fileID: 7282312980185746674}
 --- !u!65 &6841151666263804853
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -120,6 +122,10 @@ PrefabInstance:
       propertyPath: m_ReceiveShadows
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 147d8e45d8dc96f40a2f3183a1ce681b, type: 2}
     - target: {fileID: 919132149155446097, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
       propertyPath: m_Name
       value: Hexagon
