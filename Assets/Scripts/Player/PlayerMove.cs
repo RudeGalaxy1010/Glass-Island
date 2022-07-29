@@ -2,18 +2,18 @@ using UnityEngine;
 
 namespace GlassIsland
 {
-    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(Rigidbody))]
     public class PlayerMove : MonoBehaviour
     {
         [SerializeField] private Animator _animator;
         [SerializeField] private Joystick _joystick;
         [SerializeField] private float _speed;
 
-        private CharacterController _characterController;
+        private Rigidbody _rigidbody;
 
         private void Start()
         {
-            _characterController = GetComponent<CharacterController>();
+            _rigidbody = GetComponent<Rigidbody>();
         }
 
         private void Update()
@@ -27,7 +27,7 @@ namespace GlassIsland
             if (_joystick.Direction.magnitude > 0)
             {
                 var moveDirection = new Vector3(_joystick.Direction.x, 0, _joystick.Direction.y);
-                _characterController.Move(moveDirection * _speed * Time.deltaTime);
+                _rigidbody.MovePosition(transform.position + moveDirection * _speed * Time.deltaTime);
                 _animator.SetBool("IsRunning", true);
             }
             else

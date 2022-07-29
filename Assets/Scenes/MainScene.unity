@@ -1764,10 +1764,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tile (2)
       objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -2293,10 +2289,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tile (13)
       objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
       value: 12
@@ -2556,10 +2548,6 @@ PrefabInstance:
     - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_Name
       value: Tile (6)
-      objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
@@ -5620,10 +5608,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tile (12)
       objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
       value: 11
@@ -7006,10 +6990,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tile (5)
       objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -8132,10 +8112,6 @@ PrefabInstance:
     - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_Name
       value: Tile (7)
-      objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
