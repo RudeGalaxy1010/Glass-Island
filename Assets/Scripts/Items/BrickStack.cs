@@ -1,32 +1,49 @@
 using UnityEngine;
 
-public class BrickStack : Collectable
+namespace GlassIsland
 {
-    [SerializeField] private float _speed;
-
-    private Vector3 _targetPosition;
-    private int _bricksCount;
-
-    public override void Init(int bricksCount)
+    public class BrickStack : Collectable
     {
-        _bricksCount = bricksCount;
-        _targetPosition = transform.position;
-    }
+        [SerializeField] private Canvas _countTextCanvas;
+        [SerializeField] private float _speed;
 
-    private void Update()
-    {
-        if (transform.position == _targetPosition)
+        private Vector3 _targetPosition;
+        private int _count;
+
+        public override void Init(int bricksCount)
         {
-            return;
+            _count = bricksCount;
+            _targetPosition = transform.position;
+            UpdateCountText();
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _speed * Time.deltaTime);
-    }
+        private void Update()
+        {
+            if (transform.position == _targetPosition)
+            {
+                return;
+            }
 
-    public override void PickUp(Player player)
-    {
-        player.AddBricks(_bricksCount);
-        transform.SetParent(player.transform);
-        _targetPosition = player.GetBrickPosition(this);
+            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _speed * Time.deltaTime);
+        }
+
+        public override void PickUp(Player player)
+        {
+            player.AddBricks(_count);
+            transform.SetParent(player.transform);
+            _targetPosition = player.GetBrickPosition(this);
+        }
+
+        private void UpdateCountText()
+        {
+            if (_count == 5)
+            {
+                _countTextCanvas.gameObject.SetActive(true);
+            }
+            else
+            {
+                _countTextCanvas.gameObject.SetActive(false);
+            }
+        }
     }
 }

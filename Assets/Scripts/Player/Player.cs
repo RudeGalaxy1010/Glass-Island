@@ -1,24 +1,27 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+namespace GlassIsland
 {
-    [SerializeField] private Transform _storagePoint;
-
-    private int _score;
-    private int _bricksCount;
-
-    public Vector3 GetBrickPosition(BrickStack brick)
+    public class Player : MonoBehaviour
     {
-        return _storagePoint.position + Vector3.up * _bricksCount * brick.transform.lossyScale.y;
-    }
+        [SerializeField] private Transform _storagePoint;
 
-    public void AddBricks(int value)
-    {
-        _bricksCount += value;
-    }
+        private int _score;
+        private int _bricksCount;
 
-    public void AddScore(int value)
-    {
-        _score += value;
+        public Vector3 GetBrickPosition(BrickStack brick)
+        {
+            return _storagePoint.position + Vector3.up * _bricksCount * brick.transform.lossyScale.y;
+        }
+
+        public void AddBricks(int value)
+        {
+            _bricksCount += value;
+        }
+
+        public void AddScore(int value)
+        {
+            _score += value;
+        }
     }
 }

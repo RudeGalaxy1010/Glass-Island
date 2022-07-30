@@ -1,17 +1,18 @@
-using UnityEngine;
-
-public class Coin : Collectable
+namespace GlassIsland
 {
-    private int _value;
-
-    public override void Init(int value)
+    public class Coin : Collectable
     {
-        _value = value;
-    }
+        private int _value;
 
-    public override void PickUp(Player player)
-    {
-        player.AddScore(_value);
-        gameObject.SetActive(false);
+        public override void Init(int value)
+        {
+            _value = value;
+        }
+
+        public override void PickUp(Player player)
+        {
+            player.AddScore(_value);
+            gameObject.SetActive(false);
+        }
     }
 }

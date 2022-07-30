@@ -12,8 +12,8 @@ namespace GlassIsland
         [SerializeField] private BrickStack _bricks;
         [SerializeField] private Coin _coin;
 
-        private const float _singleBrickChance = 0.2f;
-        private const float _fiveBricksChance = 0.25f;
+        private const float _singleBrickChance = 0.25f;
+        private const float _fiveBricksChance = 0.2f;
         private const float _coinChance = 0.15f;
 
         private bool _isPressed;
