@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 312875136743860975}
   _joystick: {fileID: 3238445653126464845}
-  _speed: 12
+  _speed: 8
 --- !u!54 &975935345
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -182,7 +182,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!136 &975935346
 CapsuleCollider:
   m_ObjectHideFlags: 0
