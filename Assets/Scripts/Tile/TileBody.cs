@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     public class TileBody : MonoBehaviour
     {
+        public event UnityAction Dissolved;
+
         [SerializeField] private TileButton _tileButton;
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _speed;
@@ -71,6 +74,7 @@ namespace GlassIsland
             {
                 gameObject.SetActive(false);
                 _isDissolving = false;
+                Dissolved?.Invoke();
             }
         }
 

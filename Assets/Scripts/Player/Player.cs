@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +5,7 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private Transform _storagePoint;
 
+    private int _score;
     private List<Brick> _bricks = new List<Brick>();
 
     public Transform StoragePoint => _storagePoint;
@@ -20,5 +20,10 @@ public class Player : MonoBehaviour
         _bricks.Add(brick);
 
         return true;
+    }
+
+    public void AddScore(int value)
+    {
+        _score += value;
     }
 }

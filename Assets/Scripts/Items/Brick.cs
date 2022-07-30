@@ -22,7 +22,7 @@ public class Brick : Collectable
         }
     }
 
-    protected override void PickUp(Player player)
+    public override void PickUp(Player player)
     {
         if (player.TryAddBrick(this) == true)
         {

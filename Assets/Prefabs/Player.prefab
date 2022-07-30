@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 312875136743860975}
   _joystick: {fileID: 3238445653126464845}
-  _speed: 8
+  _speed: 12
 --- !u!54 &975935345
 Rigidbody:
   m_ObjectHideFlags: 0
