@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class Coin : Collectable
 {
-    [SerializeField] private int _value;
+    private int _value;
+
+    public override void Init(int value)
+    {
+        _value = value;
+    }
 
     public override void PickUp(Player player)
     {

@@ -9,49 +9,40 @@ namespace GlassIsland
         public event UnityAction Pressed;
         public event UnityAction Unpressed;
 
-        [SerializeField] private Collectable[] _collectables;
+        [SerializeField] private BrickStack _bricks;
+        [SerializeField] private Coin _coin;
+
+        private const float _singleBrickChance = 0.2f;
+        private const float _fiveBricksChance = 0.25f;
+        private const float _coinChance = 0.15f;
 
         private bool _isPressed;
 
         private void Start()
         {
-            //float randomValue = Random.value;
+            CreateItem();
+        }
 
-            //if (randomValue <= 0.25f)
-            //{
-            //    foreach (var brick in _bricks)
-            //    {
-            //        brick.gameObject.SetActive(true);
-            //    }
+        private void CreateItem()
+        {
+            float randomValue = Random.value;
+            ClearCell();
 
-            //    _coin.gameObject.SetActive(false);
-            //}
-            //else if (randomValue <= 0.5f)
-            //{
-            //    foreach (var brick in _bricks)
-            //    {
-            //        brick.gameObject.SetActive(false);
-            //    }
-
-            //    _bricks[0].gameObject.SetActive(true);
-            //    _coin.gameObject.SetActive(false);
-            //}
-            //else
-            //{
-            //    foreach (var brick in _bricks)
-            //    {
-            //        brick.gameObject.SetActive(false);
-            //    }
-
-            //    if (Random.value <= 0.25f)
-            //    {
-            //        _coin.gameObject.SetActive(true);
-            //    }
-            //    else
-            //    {
-            //        _coin.gameObject.SetActive(false);
-            //    }
-            //}
+            if (randomValue <= _coinChance)
+            {
+                _coin.gameObject.SetActive(true);
+                _coin.Init(1);
+            }
+            else if (randomValue <= _coinChance + _singleBrickChance)
+            {
+                _bricks.gameObject.SetActive(true);
+                _bricks.Init(1);
+            }
+            else if (randomValue <= _coinChance + _singleBrickChance + _fiveBricksChance)
+            {
+                _bricks.gameObject.SetActive(true);
+                _bricks.Init(5);
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -65,9 +56,13 @@ namespace GlassIsland
 
                 _isPressed = true;
 
-                foreach (var collectable in _collectables)
+                if (_bricks.gameObject.activeSelf)
                 {
-                    collectable.PickUp(player);
+                    _bricks.PickUp(player);
+                }
+                else if (_coin.gameObject.activeSelf)
+                {
+                    _coin.PickUp(player);
                 }
 
                 Pressed?.Invoke();
@@ -81,6 +76,12 @@ namespace GlassIsland
                 _isPressed = false;
                 Unpressed?.Invoke();
             }
+        }
+
+        private void ClearCell()
+        {
+            _bricks.gameObject.SetActive(false);
+            _coin.gameObject.SetActive(false);
         }
     }
 }

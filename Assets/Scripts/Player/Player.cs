@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -6,20 +5,16 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _storagePoint;
 
     private int _score;
-    private List<Brick> _bricks = new List<Brick>();
+    private int _bricksCount;
 
-    public Transform StoragePoint => _storagePoint;
-
-    public bool TryAddBrick(Brick brick)
+    public Vector3 GetBrickPosition(BrickStack brick)
     {
-        if (_bricks.Contains(brick) == true)
-        {
-            return false;
-        }
+        return _storagePoint.position + Vector3.up * _bricksCount * brick.transform.lossyScale.y;
+    }
 
-        _bricks.Add(brick);
-
-        return true;
+    public void AddBricks(int value)
+    {
+        _bricksCount += value;
     }
 
     public void AddScore(int value)
