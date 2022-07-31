@@ -6,9 +6,7 @@ namespace GlassIsland
     [RequireComponent(typeof(Collider))]
     public class TileButton : MonoBehaviour
     {
-        public event UnityAction Pressed;
-        public event UnityAction Unpressed;
-
+        [SerializeField] private TileBody _body;
         [SerializeField] private BrickStack _bricks;
         [SerializeField] private Coin _coin;
 
@@ -20,7 +18,10 @@ namespace GlassIsland
 
         private void Start()
         {
-            CreateItem();
+            if (_body.IsDissolved == true)
+            {
+                CreateItem();
+            }
         }
 
         private void CreateItem()
@@ -49,23 +50,7 @@ namespace GlassIsland
         {
             if (other.TryGetComponent(out Player player))
             {
-                if (_isPressed == true)
-                {
-                    return;
-                }
-
-                _isPressed = true;
-
-                if (_bricks.gameObject.activeSelf)
-                {
-                    _bricks.PickUp(player);
-                }
-                else if (_coin.gameObject.activeSelf)
-                {
-                    _coin.PickUp(player);
-                }
-
-                Pressed?.Invoke();
+                Press(player);
             }
         }
 
@@ -73,9 +58,35 @@ namespace GlassIsland
         {
             if (other.TryGetComponent(out Player player))
             {
-                _isPressed = false;
-                Unpressed?.Invoke();
+                Unpress();
             }
+        }
+
+        private void Press(Player player)
+        {
+            if (_isPressed == true)
+            {
+                return;
+            }
+
+            _isPressed = true;
+
+            if (_bricks.gameObject.activeSelf)
+            {
+                _bricks.PickUp(player);
+            }
+            else if (_coin.gameObject.activeSelf)
+            {
+                _coin.PickUp(player);
+            }
+
+            _body.Press(player);
+        }
+
+        private void Unpress()
+        {
+            _isPressed = false;
+            _body.Unpress();
         }
 
         private void ClearCell()

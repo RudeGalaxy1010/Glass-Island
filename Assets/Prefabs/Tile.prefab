@@ -1,5 +1,55 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5155408403862259318
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4214003132289026804}
+  - component: {fileID: 3312049968117680428}
+  m_Layer: 0
+  m_Name: Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4214003132289026804
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5155408403862259318}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5804104184129271969}
+  m_Father: {fileID: 6270958449999909099}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3312049968117680428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5155408403862259318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bcef2d138d555948990a60bbdbd5f7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tileButton: {fileID: -6498308853732425845}
+  _hexagon: {fileID: 6613398259988849179}
+  _shift: {x: 0, y: -0.05, z: 0}
+  _speed: 0.5
+  _extinctTime: 2
 --- !u!1 &6270958449999909098
 GameObject:
   m_ObjectHideFlags: 0
@@ -30,7 +80,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5804104184129271969}
+  - {fileID: 4214003132289026804}
   - {fileID: 3742193260062721785}
   - {fileID: 6331683828992627639}
   m_Father: {fileID: 0}
@@ -48,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94a7cbc6a861f2f43bdf8f3e85505f5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _body: {fileID: 3312049968117680428}
   _bricks: {fileID: 3742193260062721778}
   _coin: {fileID: 5788270766408447059}
 --- !u!65 &6841151666263804853
@@ -145,7 +196,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    m_TransformParent: {fileID: 6270958449999909099}
+    m_TransformParent: {fileID: 4214003132289026804}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
       propertyPath: m_RootOrder
@@ -233,22 +284,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -2124705421725058983, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
---- !u!114 &8265628150044115167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6613398259988849179}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bcef2d138d555948990a60bbdbd5f7b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tileButton: {fileID: -6498308853732425845}
-  _shift: {x: 0, y: -0.05, z: 0}
-  _speed: 0.5
-  _extinctTime: 2
 --- !u!1001 &8310200372616695403
 PrefabInstance:
   m_ObjectHideFlags: 0

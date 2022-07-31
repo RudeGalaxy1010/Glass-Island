@@ -8,6 +8,7 @@ namespace GlassIsland
         public event UnityAction Dissolved;
 
         [SerializeField] private TileButton _tileButton;
+        [SerializeField] private GameObject _hexagon;
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _speed;
         [SerializeField] private float _extinctTime;
@@ -21,26 +22,14 @@ namespace GlassIsland
 
         private Material _material;
 
-        private void OnEnable()
-        {
-            _tileButton.Pressed += Press;
-            _tileButton.Pressed += StartDissolving;
-            _tileButton.Unpressed += Unpress;
-        }
-
-        private void OnDisable()
-        {
-            _tileButton.Pressed -= Press;
-            _tileButton.Pressed -= StartDissolving;
-            _tileButton.Unpressed -= Unpress;
-        }
+        public bool IsDissolved => _hexagon.activeSelf;
 
         private void Start()
         {
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
-            _material = GetComponent<Renderer>().material;
+            _material = _hexagon.GetComponent<Renderer>().material;
         }
 
         private void Update()
@@ -53,12 +42,23 @@ namespace GlassIsland
             Move();
         }
 
-        private void Press()
+        public void Press(Player player)
         {
             _targetPosition = _pressedPosition;
+
+            if (player.TrySubtractBrick())
+            {
+                _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, 1);
+                _hexagon.SetActive(true);
+            }
+
+            if (_hexagon.activeSelf)
+            {
+                StartDissolving();
+            }
         }
 
-        private void Unpress()
+        public void Unpress()
         {
             _targetPosition = _idlePosition;
         }
@@ -72,7 +72,7 @@ namespace GlassIsland
 
             if (_timer <= 0)
             {
-                gameObject.SetActive(false);
+                _hexagon.SetActive(false);
                 _isDissolving = false;
                 Dissolved?.Invoke();
             }
