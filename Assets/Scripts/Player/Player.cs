@@ -4,19 +4,21 @@ namespace GlassIsland
 {
     public class Player : MonoBehaviour
     {
-        [SerializeField] private Transform _storagePoint;
+        [SerializeField] private BrickStack[] _bricks;
 
         private int _score;
         private int _bricksCount;
-
-        public Vector3 GetBrickPosition(BrickStack brick)
-        {
-            return _storagePoint.position + Vector3.up * _bricksCount * brick.transform.lossyScale.y;
-        }
+        private int _brickStacksCount;
 
         public void AddBricks(int value)
         {
             _bricksCount += value;
+            _brickStacksCount++;
+
+            if (_brickStacksCount < _bricks.Length)
+            {
+                _bricks[_brickStacksCount].gameObject.SetActive(true);
+            }
         }
 
         public void AddScore(int value)

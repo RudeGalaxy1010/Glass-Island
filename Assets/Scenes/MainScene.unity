@@ -6215,6 +6215,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 764706187}
     m_Modifications:
+    - target: {fileID: 3742193260062721778, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
+      propertyPath: _movingSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3742193260062721778, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
+      propertyPath: _rotationSpeed
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_Name
       value: Tile (15)

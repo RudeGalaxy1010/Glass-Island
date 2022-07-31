@@ -98,7 +98,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _countTextCanvas: {fileID: 2252212730380682697}
-  _speed: 4
+  _movingSpeed: 5
+  _rotationSpeed: 100
 --- !u!1 &6512070976373041993
 GameObject:
   m_ObjectHideFlags: 0

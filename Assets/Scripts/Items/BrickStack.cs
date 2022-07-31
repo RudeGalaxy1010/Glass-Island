@@ -5,33 +5,39 @@ namespace GlassIsland
     public class BrickStack : Collectable
     {
         [SerializeField] private Canvas _countTextCanvas;
-        [SerializeField] private float _speed;
+        [SerializeField] private float _movingSpeed;
+        [SerializeField] private float _rotationSpeed;
 
-        private Vector3 _targetPosition;
+        private Transform _target;
         private int _count;
 
         public override void Init(int bricksCount)
         {
             _count = bricksCount;
-            _targetPosition = transform.position;
             UpdateCountText();
         }
 
         private void Update()
         {
-            if (transform.position == _targetPosition)
+            if (_target == null)
             {
                 return;
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _speed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, _target.position, _movingSpeed * Time.deltaTime);
+
+            if (transform.position == _target.position)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         public override void PickUp(Player player)
         {
             player.AddBricks(_count);
-            transform.SetParent(player.transform);
-            _targetPosition = player.GetBrickPosition(this);
+            transform.SetParent(null);
+            _target = player.transform;
+            _countTextCanvas.gameObject.SetActive(false);
         }
 
         private void UpdateCountText()
