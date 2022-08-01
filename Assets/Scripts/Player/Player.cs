@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace GlassIsland
@@ -45,6 +46,11 @@ namespace GlassIsland
         public void AddScore(int value)
         {
             _score += value;
+        }
+
+        public void Die()
+        {
+            Destroy(gameObject);
         }
     }
 }

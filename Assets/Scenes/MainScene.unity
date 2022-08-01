@@ -3538,7 +3538,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 631907601}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5793,8 +5793,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 569847077}
-  _speed: 10
+  _speed: 8
   _offset: {x: 0, y: 4, z: -4}
+  _defaultTarget: {fileID: 631907602}
 --- !u!1001 &968122641
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13396,10 +13397,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 1635708659735374789, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
+    - target: {fileID: 3082562456757876036, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: _smoothFollow
+      value: 
+      objectReference: {fileID: 963194229}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
 --- !u!1001 &6270958450395679268

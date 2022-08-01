@@ -5,10 +5,16 @@ public class SmoothFollow : MonoBehaviour
     [SerializeField] private Transform _target;
     [SerializeField] private float _speed = 12.5f;
     [SerializeField] private Vector3 _offset;
+    [SerializeField] private Transform _defaultTarget;
 
     private void Update()
     {
         SmoothMove();
+    }
+
+    public void SetDefaultTarget()
+    {
+        _target = _defaultTarget;
     }
 
     private void SmoothMove()
