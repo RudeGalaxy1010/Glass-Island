@@ -48,8 +48,8 @@ MonoBehaviour:
   _tileButton: {fileID: -6498308853732425845}
   _hexagon: {fileID: 6613398259988849179}
   _shift: {x: 0, y: -0.05, z: 0}
-  _speed: 0.5
-  _extinctTime: 2
+  _moveSpeed: 0.5
+  _extinctTime: 1.5
 --- !u!1 &6270958449999909098
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,7 +18,7 @@ namespace GlassIsland
 
         private void Start()
         {
-            if (_body.IsDissolved == true)
+            if (_body.IsDissolved == false)
             {
                 CreateItem();
             }

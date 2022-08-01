@@ -10,7 +10,7 @@ namespace GlassIsland
         [SerializeField] private TileButton _tileButton;
         [SerializeField] private GameObject _hexagon;
         [SerializeField] private Vector3 _shift;
-        [SerializeField] private float _speed;
+        [SerializeField] private float _moveSpeed;
         [SerializeField] private float _extinctTime;
 
         private Vector3 _idlePosition;
@@ -22,7 +22,7 @@ namespace GlassIsland
 
         private Material _material;
 
-        public bool IsDissolved => _hexagon.activeSelf;
+        public bool IsDissolved => _hexagon.activeSelf == false;
 
         private void Start()
         {
@@ -46,14 +46,17 @@ namespace GlassIsland
         {
             _targetPosition = _pressedPosition;
 
-            if (_hexagon.activeSelf)
+            if (IsDissolved == false && _isDissolving == false)
             {
                 StartDissolving();
+                return;
             }
-            else if (player.TrySubtractBrick())
+
+            if (player.TrySubtractBrick())
             {
                 _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, 1);
                 _hexagon.SetActive(true);
+                _isDissolving = false;
             }
         }
 
@@ -81,17 +84,12 @@ namespace GlassIsland
         {
             if (transform.position != _targetPosition)
             {
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _speed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _moveSpeed * Time.deltaTime);
             }
         }
 
         private void StartDissolving()
         {
-            if (_isDissolving == true)
-            {
-                return;
-            }
-
             _isDissolving = true;
             _timer = _extinctTime;
         }
