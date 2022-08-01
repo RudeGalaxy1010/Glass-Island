@@ -46,7 +46,7 @@ namespace GlassIsland
         {
             _targetPosition = _pressedPosition;
 
-            if (player.TrySubtractBrick())
+            if (_hexagon.activeSelf == false && player.TrySubtractBrick())
             {
                 _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, 1);
                 _hexagon.SetActive(true);

@@ -8,23 +8,21 @@ namespace GlassIsland
 
         private int _score;
         private int _bricksCount;
-        private int _brickStacksCount;
 
         public void AddBricks(int value)
         {
             _bricksCount += value;
-            _brickStacksCount++;
-            UpdateStorage();
+            UpdateStorage(_bricksCount);
         }
 
-        private void UpdateStorage()
+        private void UpdateStorage(int bricksCount)
         {
             foreach (var brick in _bricks)
             {
                 brick.gameObject.SetActive(false);
             }
 
-            int bricksToShow = _brickStacksCount < _bricks.Length ? _brickStacksCount : _bricks.Length;
+            int bricksToShow = bricksCount < _bricks.Length ? bricksCount : _bricks.Length;
 
             for (int i = 0; i < bricksToShow; i++)
             {
@@ -37,21 +35,7 @@ namespace GlassIsland
             if (_bricksCount > 0)
             {
                 _bricksCount--;
-
-                if (_brickStacksCount <= 0 && _bricksCount > 0)
-                {
-                    _brickStacksCount = 1;
-                }
-                else if (_bricksCount == 0)
-                {
-                    _brickStacksCount = 0;
-                }
-                else if (_brickStacksCount > 1)
-                {
-                    _brickStacksCount--;
-                }
-
-                UpdateStorage();
+                UpdateStorage(_bricksCount);
                 return true;
             }
 
