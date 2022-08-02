@@ -1,14 +1,21 @@
-using System;
+using TMPro;
 using UnityEngine;
 
 namespace GlassIsland
 {
     public class Player : MonoBehaviour
     {
+        [SerializeField] private string _name;
         [SerializeField] private BrickStack[] _bricks;
+        [SerializeField] private TMP_Text _nameText;
 
         private int _score;
         private int _bricksCount;
+
+        private void Start()
+        {
+            _nameText.text = _name;
+        }
 
         public void AddBricks(int value)
         {
