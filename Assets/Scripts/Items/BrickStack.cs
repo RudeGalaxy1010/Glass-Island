@@ -5,6 +5,7 @@ namespace GlassIsland
     public class BrickStack : Collectable
     {
         [SerializeField] private Canvas _countTextCanvas;
+        [SerializeField] private GameObject _additionalBrick;
         [SerializeField] private float _movingSpeed;
         [SerializeField] private float _rotationSpeed;
 
@@ -45,10 +46,12 @@ namespace GlassIsland
             if (_count == 5)
             {
                 _countTextCanvas.gameObject.SetActive(true);
+                _additionalBrick.SetActive(true);
             }
             else
             {
                 _countTextCanvas.gameObject.SetActive(false);
+                _additionalBrick.SetActive(false);
             }
         }
     }
