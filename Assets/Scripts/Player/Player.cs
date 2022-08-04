@@ -1,10 +1,13 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     public class Player : MonoBehaviour
     {
+        public event UnityAction<int> ScoreChanged;
+
         [SerializeField] private string _name;
         [SerializeField] private BrickStack[] _bricks;
         [SerializeField] private TMP_Text _nameText;
@@ -53,6 +56,7 @@ namespace GlassIsland
         public void AddScore(int value)
         {
             _score += value;
+            ScoreChanged?.Invoke(_score);
         }
 
         public void Die()
