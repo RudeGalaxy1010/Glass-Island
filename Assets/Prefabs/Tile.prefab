@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4214003132289026804}
   - component: {fileID: 3312049968117680428}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,9 +121,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6270958449999909099}
     m_Modifications:
+    - target: {fileID: 7446828065975371457, guid: 88982671ffd200447b404eca22b5835d, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7900040850164840290, guid: 88982671ffd200447b404eca22b5835d, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7900040850843541944, guid: 88982671ffd200447b404eca22b5835d, type: 3}
       propertyPath: m_Name
       value: Coin
+      objectReference: {fileID: 0}
+    - target: {fileID: 7900040850843541944, guid: 88982671ffd200447b404eca22b5835d, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7900040850843541944, guid: 88982671ffd200447b404eca22b5835d, type: 3}
       propertyPath: m_IsActive
@@ -258,6 +270,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hexagon
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2b873a1fc3fa6ec4d8fafd045d1e9d38, type: 3}
 --- !u!4 &5804104184129271969 stripped
@@ -340,7 +356,23 @@ PrefabInstance:
       value: Brick
       objectReference: {fileID: 0}
     - target: {fileID: 4664941709367789715, guid: c99d730af4355b64aabc90db6f0d077b, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4664941709367789715, guid: c99d730af4355b64aabc90db6f0d077b, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6512070976373041993, guid: c99d730af4355b64aabc90db6f0d077b, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6814696459343990617, guid: c99d730af4355b64aabc90db6f0d077b, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8880563215247213014, guid: c99d730af4355b64aabc90db6f0d077b, type: 3}
+      propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

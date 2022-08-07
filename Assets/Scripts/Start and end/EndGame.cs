@@ -6,6 +6,7 @@ namespace GlassIsland
     public class EndGame : MonoBehaviour
     {
         [SerializeField] private float _minHeight;
+        [SerializeField] private GameObject _endScreen;
         [SerializeField] private SmoothFollow _smoothFollow;
 
         private Player _player;
@@ -23,6 +24,7 @@ namespace GlassIsland
             {
                 _playerMove.enabled = false;
                 _smoothFollow.SetDefaultTarget();
+                _endScreen.SetActive(true);
                 _player.Die();
             }
         }

@@ -14,8 +14,7 @@ namespace GlassIsland
         {
             foreach (var player in _players)
             {
-                player.enabled = false;
-                player.GetComponent<Rigidbody>().useGravity = false;
+                player.Disable();
                 player.transform.position = GetRandomPosition();
             }
 
@@ -33,8 +32,7 @@ namespace GlassIsland
             yield return new WaitForSeconds(delay);
             foreach (var player in _players)
             {
-                player.enabled = true;
-                player.GetComponent<Rigidbody>().useGravity = true;
+                player.Enable();
             }
         }
     }
