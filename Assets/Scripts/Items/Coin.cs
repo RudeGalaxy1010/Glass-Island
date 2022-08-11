@@ -1,39 +1,29 @@
+using System.Collections;
 using UnityEngine;
 
 namespace GlassIsland
 {
     public class Coin : Collectable
     {
-        [SerializeField] private float _movingSpeed;
-
+        [SerializeField] private Animation _animation;
         private int _value;
-        private Transform _target;
 
         public override void Init(int value)
         {
             _value = value;
         }
 
-        private void Update()
-        {
-            if (_target == null)
-            {
-                return;
-            }
-
-            transform.position = Vector3.MoveTowards(transform.position, _target.position, _movingSpeed * Time.deltaTime);
-
-            if (transform.position == _target.position)
-            {
-                gameObject.SetActive(false);
-            }
-        }
-
         public override void PickUp(Player player)
         {
             player.AddScore(_value);
-            transform.SetParent(null);
-            _target = player.transform;
+            _animation.Play();
+            StartCoroutine(Disable(_animation.clip.length));
+        }
+
+        private IEnumerator Disable(float time)
+        {
+            yield return new WaitForSeconds(time);
+            gameObject.SetActive(false);
         }
     }
 }
