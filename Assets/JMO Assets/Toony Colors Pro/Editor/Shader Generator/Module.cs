@@ -33,6 +33,7 @@ namespace ToonyColorsPro
 			public string[] Keywords = new string[0];
 			public string[] ShaderFeaturesBlock = new string[0];
 			public string[] PropertiesBlock = new string[0];
+			public string[] Functions = new string[0];
 			public string[] Variables = new string[0];
 			public string[] InputStruct = new string[0];
 			Dictionary<string, string[]> Vertices = new Dictionary<string, string[]>();
@@ -78,6 +79,7 @@ namespace ToonyColorsPro
 				List<string> shaderFeaturesBlock = new List<string>();
 				List<string> propertiesBlock = new List<string>();
 				List<string> variables = new List<string>();
+				List<string> functions = new List<string>();
 				List<string> inputStruct = new List<string>();
 
 				Dictionary<string, List<Argument>> verticesArgs = new Dictionary<string, List<Argument>>();
@@ -147,6 +149,7 @@ namespace ToonyColorsPro
 								case "#KEYWORDS": currentList = keywords; break;
 								case "#PROPERTIES_BLOCK": currentList = propertiesBlock; break;
 								case "#SHADER_FEATURES_BLOCK": currentList = shaderFeaturesBlock; break;
+								case "#FUNCTIONS": currentList = functions; break;
 								case "#VARIABLES": currentList = variables; break;
 								case "#INPUT": currentList = inputStruct; break;
 								case "#END": currentList = null; break;
@@ -169,6 +172,7 @@ namespace ToonyColorsPro
 				module.Keywords = keywords.ToArray();
 				module.ShaderFeaturesBlock = shaderFeaturesBlock.ToArray();
 				module.PropertiesBlock = propertiesBlock.ToArray();
+				module.Functions = functions.ToArray();
 				module.Variables = variables.ToArray();
 				module.InputStruct = inputStruct.ToArray();
 
@@ -244,6 +248,7 @@ namespace ToonyColorsPro
 				RemoveMinimumIndentation(this.Keywords);
 				RemoveMinimumIndentation(this.ShaderFeaturesBlock);
 				RemoveMinimumIndentation(this.PropertiesBlock);
+				RemoveMinimumIndentation(this.Functions);
 				RemoveMinimumIndentation(this.Variables);
 				RemoveMinimumIndentation(this.InputStruct);
 				RemoveMinimumIndentation(this.Vertices);

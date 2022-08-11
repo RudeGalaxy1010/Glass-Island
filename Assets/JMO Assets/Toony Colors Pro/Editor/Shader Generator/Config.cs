@@ -12,6 +12,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using ToonyColorsPro.Utilities;
+using ToonyColorsPro.ShaderGenerator.CodeInjection;
 
 // Represents a Toony Colors Pro 2 configuration to generate the corresponding shader
 // (new version for Shader Generator 2)
@@ -81,6 +82,7 @@ namespace ToonyColorsPro
 			[Serialization.SerializeAs("features")] internal List<string> Features = new List<string>();
 			internal List<string> ExtraTempFeatures = new List<string>();
 			[Serialization.SerializeAs("flags")] internal List<string> Flags = new List<string>();
+			[Serialization.SerializeAs("flags_extra")] internal Dictionary<string, List<string>> FlagsExtra = new Dictionary<string, List<string>>();
 			[Serialization.SerializeAs("keywords")] internal Dictionary<string, string> Keywords = new Dictionary<string, string>();
 			internal bool isModifiedExternally = false;
 
@@ -106,6 +108,11 @@ namespace ToonyColorsPro
 			internal ShaderProperty.CustomMaterialProperty[] CustomMaterialProperties { get { return customMaterialPropertiesList.ToArray(); } }
 			internal ShaderProperty[] VisibleShaderProperties { get { return visibleShaderProperties.ToArray(); } }
 			internal ShaderProperty[] AllShaderProperties { get { return cachedShaderProperties.ToArray(); } }
+
+
+			// Code Injection properties
+			[Serialization.SerializeAs("codeInjection")] internal CodeInjectionManager codeInjection = new CodeInjectionManager();
+
 
 			internal string[] GetShaderPropertiesNeededFeaturesForPass(int passIndex)
 			{
@@ -158,6 +165,11 @@ namespace ToonyColorsPro
 					}
 				}
 				return features.ToArray();
+			}
+
+			internal string[] GetCodeInjectionNeeededFeatures()
+			{
+				return codeInjection.GetNeededFeatures();
 			}
 
 			/// <summary>
@@ -268,10 +280,15 @@ namespace ToonyColorsPro
 				foreach (var flag in Flags)
 					config.Flags.Add(flag);
 
+				foreach (var kvp in FlagsExtra)
+					config.FlagsExtra.Add(kvp.Key, new List<string>(kvp.Value));
+
 				foreach (var kvp in Keywords)
 					config.Keywords.Add(kvp.Key, kvp.Value);
 
 				config.templateFile = templateFile;
+
+				config.codeInjection = codeInjection;
 
 				return config;
 			}
@@ -341,6 +358,11 @@ namespace ToonyColorsPro
 				orderedFeatures.Sort();
 				var orderedFlags = new List<string>(Flags);
 				orderedFlags.Sort();
+				var orderedFlagsExtra = new List<string>();
+				foreach (var kvp in FlagsExtra)
+					foreach (var flag in kvp.Value)
+						orderedFlagsExtra.Add(flag);
+				orderedFlagsExtra.Sort();
 				var sortedKeywordsKeys = new List<string>(Keywords.Keys);
 				sortedKeywordsKeys.Sort();
 				var sortedKeywordsValues = new List<string>(Keywords.Values);
@@ -600,32 +622,7 @@ namespace ToonyColorsPro
 
 								Func<object, string, object> onDeserializeImplementation = (impObj, impData) =>
 								{
-									//make sure to deserialize as a new object, so that final Implementation subtype is kept instead of creating base Implementation class
-									var imp = Serialization.Deserialize(impData, new object[] { matchedSp });
-
-									//if custom material property, find the one with the matching serialized name
-									if (imp is ShaderProperty.Imp_CustomMaterialProperty)
-									{
-										var ict = (imp as ShaderProperty.Imp_CustomMaterialProperty);
-										var matchedCt = customMaterialPropertiesList.Find(ct => ct.PropertyName == ict.LinkedCustomMaterialPropertyName);
-										//will be the match, or null if nothing found
-										ict.LinkedCustomMaterialProperty = matchedCt;
-										ict.UpdateChannels();
-									}
-									else if (imp is ShaderProperty.Imp_ShaderPropertyReference)
-									{
-										//find existing shader property and link it here
-										//TODO: what if the shader property hasn't been deserialized yet?
-										var ispr = (imp as ShaderProperty.Imp_ShaderPropertyReference);
-										var channels = ispr.Channels;
-										var matchedLinkedSp = visibleShaderProperties.Find(sp => sp.Name == ispr.LinkedShaderPropertyName);
-										ispr.LinkedShaderProperty = matchedLinkedSp;
-										//restore channels from serialized data (it is reset when assigning a new linked shader property)
-										if (!string.IsNullOrEmpty(channels))
-											ispr.Channels = channels;
-									}
-
-									return imp;
+									return this.DeserializeImplementationHandler(impObj, impData, matchedSp);
 								};
 
 								var implementationHandling = new Dictionary<Type, Func<object, string, object>> { { typeof(ShaderProperty.Implementation), onDeserializeImplementation } };
@@ -669,6 +666,47 @@ namespace ToonyColorsPro
 				}
 			}
 
+			internal object DeserializeImplementationHandler(object impObj, string serializedData, ShaderProperty existingShaderProperty)
+			{
+				//make sure to deserialize as a new object, so that final Implementation subtype is kept instead of creating base Implementation class
+				var imp = Serialization.Deserialize(serializedData, new object[] { existingShaderProperty });
+
+				//if custom material property, find the one with the matching serialized name
+				if (imp is ShaderProperty.Imp_CustomMaterialProperty)
+				{
+					var ict = (imp as ShaderProperty.Imp_CustomMaterialProperty);
+					var matchedCt = customMaterialPropertiesList.Find(ct => ct.PropertyName == ict.LinkedCustomMaterialPropertyName);
+					//will be the match, or null if nothing found
+					ict.LinkedCustomMaterialProperty = matchedCt;
+					ict.UpdateChannels();
+				}
+				else if (imp is ShaderProperty.Imp_ShaderPropertyReference)
+				{
+					//find existing shader property and link it here
+					//TODO: what if the shader property hasn't been deserialized yet?
+					var ispr = (imp as ShaderProperty.Imp_ShaderPropertyReference);
+					var channels = ispr.Channels;
+					var matchedLinkedSp = visibleShaderProperties.Find(sp => sp.Name == ispr.LinkedShaderPropertyName);
+					ispr.LinkedShaderProperty = matchedLinkedSp;
+					//restore channels from serialized data (it is reset when assigning a new linked shader property)
+					if (!string.IsNullOrEmpty(channels))
+						ispr.Channels = channels;
+				}
+				else if (imp is ShaderProperty.Imp_MaterialProperty_Texture)
+				{
+					// find existing shader property for uv if that option is enabled, and link it
+					var impt = (imp as ShaderProperty.Imp_MaterialProperty_Texture);
+					var channels = impt.UVChannels;
+					var matchedLinkedSp = visibleShaderProperties.Find(sp => sp.Name == impt.LinkedShaderPropertyName);
+					impt.LinkedShaderProperty = matchedLinkedSp;
+					//restore channels from serialized data (it is reset when assigning a new linked shader property)
+					if (!string.IsNullOrEmpty(channels))
+						impt.UVChannels = channels;
+				}
+
+				return imp;
+			}
+
 			internal void AutoNames()
 			{
 				var rawName = ShaderName.Replace("Toony Colors Pro 2/", "");
@@ -692,8 +730,12 @@ namespace ToonyColorsPro
 			internal bool HasFeaturesAny(params string[] features)
 			{
 				foreach (var f in features)
+				{
 					if (Features.Contains(f))
+					{
 						return true;
+					}
+				}
 
 				return false;
 			}
@@ -701,8 +743,22 @@ namespace ToonyColorsPro
 			internal bool HasFeaturesAll(params string[] features)
 			{
 				foreach (var f in features)
-					if (!Features.Contains(f))
-						return false;
+				{
+					if (f[0] == '!')
+					{
+						if (Features.Contains(f.Substring(1)))
+						{
+							return false;
+						}
+					}
+					else
+					{
+						if (!Features.Contains(f))
+						{
+							return false;
+						}
+					}
+				}
 
 				return true;
 			}
@@ -722,18 +778,36 @@ namespace ToonyColorsPro
 			//--------------------------------------------------------------------------------------------------
 			// FLAGS
 
-			internal bool HasFlag(string flag)
+			internal bool HasFlag(string block, string flag)
 			{
-				return Flags.Contains(flag);
+				if (block == "pragma_surface_shader")
+				{
+					return Flags.Contains(flag);
+				}
+				else
+				{
+					return FlagsExtra.ContainsKey(block) && FlagsExtra[block].Contains(flag);
+				}
 			}
 
-			internal void ToggleFlag(string flag, bool enable)
+			internal void ToggleFlag(string block, string flag, bool enable)
 			{
-				if (!Flags.Contains(flag) && enable)
-					Flags.Add(flag);
+				List<string> flagList = null;
+				if (block == "pragma_surface_shader")
+				{
+					flagList = Flags;
+				}
+				else
+				{
+					if (!FlagsExtra.ContainsKey(block))
+					{
+						FlagsExtra.Add(block, new List<string>());
+					}
+					flagList = FlagsExtra[block];
+				}
 
-				else if (Flags.Contains(flag) && !enable)
-					Flags.Remove(flag);
+				if (!flagList.Contains(flag) && enable)			flagList.Add(flag);
+				else if (flagList.Contains(flag) && !enable)	flagList.Remove(flag);
 			}
 
 			//--------------------------------------------------------------------------------------------------
@@ -890,7 +964,9 @@ namespace ToonyColorsPro
 				if (ShaderGenerator2.ContextualHelpBox(
 					"This section allows you to modify some shader properties that will be used in the shader, based on the features enabled in the corresponding tab.\nClick here to open the documentation and see some examples.",
 					"shaderproperties"))
+				{
 					GUILayout.Space(4);
+				}
 
 				if (visibleShaderProperties.Count == 0)
 				{
@@ -1100,7 +1176,7 @@ namespace ToonyColorsPro
 #if UNITY_2019_3_OR_NEWER
 				Utils.AddIfMissing(this.Features, "UNITY_2019_3");
 #endif
-				var parsedLines = template.GetParsedLinesFromConditions(this, null);
+				var parsedLines = template.GetParsedLinesFromConditions(this, null, null);
 
 				//Clear arrays: will be refilled with the template's shader properties
 				visibleShaderProperties.Clear();
@@ -1122,6 +1198,7 @@ namespace ToonyColorsPro
 				}
 
 				//Find used shader properties per pass, to extract used features for each
+				template.UpdateInjectionPoints(parsedLines);
 				shaderPropertiesPerPass = template.FindUsedShaderPropertiesPerPass(parsedLines);
 
 				// Build list of shader properties and headers for the UI
@@ -1188,7 +1265,7 @@ namespace ToonyColorsPro
 			//Use temp features & flags to avoid permanent toggles (e.g. NOTILE_SAMPLING)
 			//As long as the original features are there, they should be triggered each time anyway
 			/// <returns>'true' if a new feature/flag has been added/removed, so that we can reprocess the whole keywords block</returns>
-			internal bool ProcessKeywords(string line, List<string> tempFeatures, List<string> tempFlags)
+			internal bool ProcessKeywords(string line, List<string> tempFeatures, List<string> tempFlags, Dictionary<string, List<string>> tempExtraFlags)
 			{
 				if (string.IsNullOrEmpty(line))
 				{
@@ -1197,6 +1274,8 @@ namespace ToonyColorsPro
 
 				//Inside valid block
 				var parts = line.Split(new[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+
+				// Fixed expressions first:
 				switch (parts[0])
 				{
 					case "set": //legacy
@@ -1251,6 +1330,50 @@ namespace ToonyColorsPro
 							}
 						}
 						break;
+
+					default:
+					{
+						// Dynamic afterwards:
+						if (parts[0].StartsWith("flag_on:"))
+						{
+							if (tempExtraFlags == null)
+							{
+								return false;
+							}
+
+							string block = parts[0].Substring("flag_on:".Length);
+							if (!tempExtraFlags.ContainsKey(block)) tempExtraFlags.Add(block, new List<string>());
+
+							if (Utils.AddIfMissing(tempExtraFlags[block], parts[1]))
+							{
+								return true;
+							}
+						}
+						else if (parts[0].StartsWith("flag_off:"))
+						{
+							if (tempExtraFlags == null)
+							{
+								return false;
+							}
+
+							string block = parts[0].Substring("flag_on:".Length);
+							if (!tempExtraFlags.ContainsKey(block))
+							{
+								return false;
+							}
+
+							if (Utils.RemoveIfExists(tempExtraFlags[block], parts[1]))
+							{
+								if (tempExtraFlags[block].Count == 0)
+								{
+									tempExtraFlags.Remove(block);
+								}
+
+								return true;
+							}
+						}
+					}
+					break;
 				}
 
 				return false;

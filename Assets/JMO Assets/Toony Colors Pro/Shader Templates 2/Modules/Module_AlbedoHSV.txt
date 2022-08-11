@@ -42,8 +42,8 @@ sngl	lbl="Mask"				kw=ALBEDO_HSV_MASK		indent		needs=ALBEDO_HSV											tt="Ma
 #PROPERTIES_BLOCK
 /// IF ALBEDO_HSV
 	#if_not_empty
-		[Header(Albedo HSV)]
-		[HideInInspector] __BeginGroup_ShadowHSV ("Albedo HSV", Float) = 0
+		[TCP2HeaderHelp(Albedo HSV)]
+		[HideInInspector] __BeginGroup_AlbedoHSV ("Albedo HSV", Float) = 0
 	#start_not_empty_block
 		[[PROP:Albedo Hue]]
 		[[PROP:Albedo Saturation]]

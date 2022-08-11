@@ -73,7 +73,7 @@ sngl	lbl="Make Optional"				kw=SS_SHADER_FEATURE											needs=SUBSURFACE_SCAT
 
 //================================================================
 
-#VARIABLES
+#FUNCTIONS
 /// IF SUBSURFACE_SCATTERING && SS_SCREEN_INFLUENCE && (SS_DIR_LIGHTS || SS_ALL_LIGHTS)
 
 		//Subsurface Scattering directional light screen-space influence

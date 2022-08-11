@@ -173,6 +173,11 @@ namespace ToonyColorsPro
 					return implementation.PrintVariableDeclare(indent);
 				}
 
+				public string PrintVariablesDeclareOutsideCBuffer(string indent)
+				{
+					return implementation.PrintVariableDeclareOutsideCBuffer(indent);
+				}
+
 				public string PrintVariableFragment()
 				{
 					// Only texture properties need sampling, others can use their variable name directly
@@ -238,6 +243,9 @@ namespace ToonyColorsPro
 						var guiContent = new GUIContent(string.Format("{0} ({1})", Label, implementationTypeLabel));
 						rect.width -= buttonWidth*2;
 
+						// hover
+						TCP2_GUI.DrawHoverRect(rect);
+
 						EditorGUI.BeginChangeCheck();
 						expanded = EditorGUI.Foldout(rect, expanded, guiContent, true, TCP2_GUI.HeaderDropDown);
 						if (EditorGUI.EndChangeCheck())
@@ -267,10 +275,12 @@ namespace ToonyColorsPro
 
 						var labelWidth = TCP2_GUI.HeaderDropDown.CalcSize(guiContent).x;
 						rect = GUILayoutUtility.GetLastRect();
-						rect.y += 2;
 						rect.x += labelWidth;
 						rect.width -= labelWidth;
-						GUI.Label(rect, ": " + PropertyName, SGUILayout.Styles.GrayMiniLabel);
+						using (new EditorGUI.DisabledScope(true))
+						{
+							GUI.Label(rect, ": " + PropertyName, EditorStyles.miniLabel);
+						}
 					}
 
 					if (expanded)

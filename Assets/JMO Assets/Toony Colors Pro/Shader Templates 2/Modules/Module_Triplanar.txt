@@ -4,14 +4,14 @@
 // Shader Generator Module: Triplanar Mapping
 
 #FEATURES
-sngl	lbl="Triplanar Mapping"			kw=TRIPLANAR																								help=triplanar	tt="Enables triplanar mapping"
-mult	lbl="UV Space"					kw=World Space|,Object Space|TRIPLANAR_OBJECT_SPACE							needs=TRIPLANAR						indent		tt="How to generate the UVs"
+sngl	lbl="Triplanar Mapping"			kw=TRIPLANAR															help="featuresreference/surface/triplanarmapping"		tt="Enables triplanar mapping"
+mult	lbl="UV Space"					kw=World Space|,Object Space|TRIPLANAR_OBJECT_SPACE								needs=TRIPLANAR						indent		tt="How to generate the UVs"
 mult	lbl="Surface Texture"				kw=One Texture (ground)|,Two Textures (ground + ceiling)|TRIPLANAR_CEILING	needs=TRIPLANAR						indent		tt="Use different textures for the ground and ceiling"
-mult	lbl="Ceiling Mode"				kw=Y Normal Direction|,Min Max Threshold|TRIPLANAR_CEILING_MINMAX			needs=TRIPLANAR,TRIPLANAR_CEILING	indent=2	tt="How the ceiling texture should be applied\nBased on the surface normal, or according to the vertex Y position"
-mult	lbl="Walls Texture"				kw=One Texture|,Two Textures (X + Z)|TRIPLANAR_SIDES_XZ						needs=TRIPLANAR						indent		tt="Use different textures for the X and Z orientations"
+mult	lbl="Ceiling Mode"				kw=Y Normal Direction|,Min Max Threshold|TRIPLANAR_CEILING_MINMAX				needs=TRIPLANAR,TRIPLANAR_CEILING	indent=2	tt="How the ceiling texture should be applied\nBased on the surface normal, or according to the vertex Y position"
+mult	lbl="Walls Texture"				kw=One Texture|,Two Textures (X + Z)|TRIPLANAR_SIDES_XZ							needs=TRIPLANAR						indent		tt="Use different textures for the X and Z orientations"
 mult	lbl="Height Blending (Alpha)"		kw=Off (Linear)|,Walls Alpha|TRIPLANAR_HEIGHT_SIDES,Ground Alpha|TRIPLANAR_HEIGHT_GROUND	needs=TRIPLANAR		indent		tt="Modulate the transition between textures based on their alpha channel (height map)"
-sngl	lbl="Triplanar Normal Maps"		kw=TRIPLANAR_BUMP	excl=BUMP																needs=TRIPLANAR		indent		tt="Add one normal map per triplanar texture"
-sngl	lbl="Object Position Offset"		kw=TRIPLANAR_OBJ_POS_OFFSET																	needs=TRIPLANAR		indent		tt="Offset the world UV with the object's position, so that the mapping doesn't change when the object translates in the world"
+sngl	lbl="Triplanar Normal Maps"		kw=TRIPLANAR_BUMP	excl=BUMP													needs=TRIPLANAR						indent		tt="Add one normal map per triplanar texture"
+sngl	lbl="Object Position Offset"		kw=TRIPLANAR_OBJ_POS_OFFSET													needs=TRIPLANAR						indent		tt="Offset the world UV with the object's position, so that the mapping doesn't change when the object translates in the world"
 warning	msgType=info					needs=TRIPLANAR		lbl="It is recommended to use a constant for the Albedo property when using Triplanar, as it will effectively replace it."
 space	space=4							needs=TRIPLANAR
 #END
@@ -33,15 +33,15 @@ space	space=4							needs=TRIPLANAR
 	///
 ///
 /// IF TRIPLANAR && TRIPLANAR_BUMP && !BUMP
-		color_rgba	Ground Texture Normal Map		fragment, imp(texture, label = "Ground Normal Map", variable = "_TriGroundBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = _GroundTexture_ST)
+		color_rgba	Ground Texture Normal Map		fragment, imp(texture, label = "Ground Normal Map", variable = "_TriGroundBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = "_TriGround_ST")
 	/// IF TRIPLANAR_SIDES_XZ
-		color_rgba	Wall X Texture Normal Map		fragment, imp(texture, label = "Wall X Normal Map", variable = "_TriSideXBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = _WallXTexture_ST)
-		color_rgba	Wall Z Texture Normal Map		fragment, imp(texture, label = "Wall Z Normal Map", variable = "_TriSideZBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = _WallZTexture_ST)
+		color_rgba	Wall X Texture Normal Map		fragment, imp(texture, label = "Wall X Normal Map", variable = "_TriSideXBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = "_TriSideX_ST")
+		color_rgba	Wall Z Texture Normal Map		fragment, imp(texture, label = "Wall Z Normal Map", variable = "_TriSideZBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = "_TriSideZ_ST")
 	/// ELSE
-		color_rgba	Walls Texture Normal Map		fragment, imp(texture, label = "Walls Normal Map", variable = "_TriSideBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = _WallsTexture_ST)
+		color_rgba	Walls Texture Normal Map		fragment, imp(texture, label = "Walls Normal Map", variable = "_TriSideBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = "_TriSide_ST")
 	///
 	/// IF TRIPLANAR_CEILING
-		color_rgba	Ceiling Texture Normal Map		fragment, imp(texture, label = "Ceiling Normal Map", variable = "_TriCeilingBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = _CeilingTexture_ST)
+		color_rgba	Ceiling Texture Normal Map		fragment, imp(texture, label = "Ceiling Normal Map", variable = "_TriCeilingBump", default = bump, locked = true, locked_uv = true, tiling_offset_var = "_TriCeiling_ST")
 	///
 ///
 /// IF TRIPLANAR && ((TRIPLANAR_CEILING && TRIPLANAR_CEILING_MINMAX) || (TRIPLANAR_HEIGHT_SIDES || TRIPLANAR_HEIGHT_GROUND))
@@ -155,7 +155,7 @@ space	space=4							needs=TRIPLANAR
 ///
 #END
 
-#FRAGMENT(float4 albedoAlpha, float3 worldPos)
+#FRAGMENT(float4 albedoAlpha, float3 worldPos, float3 objPos)
 /// IF TRIPLANAR
 
 	/// IF TRIPLANAR_OBJ_POS_OFFSET
@@ -206,7 +206,11 @@ space	space=4							needs=TRIPLANAR
 	///
 	/// IF TRIPLANAR_CEILING
 		/// IF TRIPLANAR_CEILING_MINMAX
+			/// IF TRIPLANAR_OBJECT_SPACE
+			float triplanar_ceiling_lerp = smoothstep(objPos.y - 0.1, objPos.y, [[VALUE:Ceiling Max]]) - smoothstep(objPos.y, objPos.y + 0.1, [[VALUE:Ceiling Min]]);
+			/// ELSE
 			float triplanar_ceiling_lerp = smoothstep(worldPos.y - 0.1, worldPos.y, [[VALUE:Ceiling Max]]) - smoothstep(worldPos.y, worldPos.y + 0.1, [[VALUE:Ceiling Min]]);
+			///
 			triplanar = lerp(tex_ceiling, triplanar, triplanar_ceiling_lerp);
 		/// ELSE
 			float triplanar_ceiling_lerp = saturate(sign(triplanarNormal.y)+1);
@@ -248,6 +252,7 @@ space	space=4							needs=TRIPLANAR
 		///
 			blendWeights.y = abs(blendWeights.y);
 	///
+
 			//Whiteout blending
 			tex_sideX_bump = half3(tex_sideX_bump.xy + triplanarNormal.zy,abs(tex_sideX_bump.z) * triplanarNormal.x);
 			normalMap = half3(normalMap.xy + triplanarNormal.xz,abs(normalMap.z) * triplanarNormal.y);
@@ -256,9 +261,9 @@ space	space=4							needs=TRIPLANAR
 			outNormal = normalize(tex_sideX_bump.zyx * blendWeights.x + normalMap.xzy * blendWeights.y + tex_sideZ_bump.xyz * blendWeights.z);
 	/// IF TRIPLANAR_OBJECT_SPACE
 		/// IF LWRP
-			outNormal = TransformObjectToWorldNormal(outNormal);
+			normalWS = TransformObjectToWorldNormal(normalWS);
 		/// ELSE
-			outNormal = mul(unity_ObjectToWorld, float4(outNormal, 1));
+			outNormal = UnityObjectToWorldNormal(outNormal);
 		///
 	///
 ///

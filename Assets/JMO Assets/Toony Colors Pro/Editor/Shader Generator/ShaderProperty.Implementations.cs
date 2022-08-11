@@ -23,6 +23,7 @@ namespace ToonyColorsPro
 				static public Type[] MenuOrders = new Type[]
 				{
 					typeof(Imp_ConstantValue),
+					typeof(Imp_ConstantFloat),
 					typeof(Imp_MaterialProperty_Float),
 					typeof(Imp_MaterialProperty_Range),
 					typeof(Imp_MaterialProperty_Vector),
@@ -30,6 +31,10 @@ namespace ToonyColorsPro
 					typeof(Imp_MaterialProperty_Texture),
 					typeof(Imp_VertexColor),
 					typeof(Imp_VertexTexcoord),
+					typeof(Imp_LocalPosition),
+					typeof(Imp_WorldPosition),
+					typeof(Imp_LocalNormal),
+					typeof(Imp_WorldNormal),
 					typeof(Imp_ShaderPropertyReference),
 					typeof(Imp_CustomMaterialProperty),
 					typeof(Imp_HSV),
@@ -52,7 +57,6 @@ namespace ToonyColorsPro
 				}
 
 				public ShaderProperty ParentShaderProperty;
-
 
 				public virtual void CheckErrors() { }
 				public virtual bool HasErrors { get { return false; } }
@@ -85,7 +89,21 @@ namespace ToonyColorsPro
 					var props = GetType().GetProperties();
 					foreach (var prop in props)
 					{
-						result.Append(prop.GetValue(this, null));
+						var attributes = prop.GetCustomAttributes(typeof(Serialization.SerializeAsAttribute), true);
+						if (attributes == null || attributes.Length == 0)
+						{
+							continue;
+						}
+
+						if (prop.PropertyType == typeof(ShaderProperty))
+						{
+							var spRef = (ShaderProperty)prop.GetValue(this, null);
+							result.Append(spRef != null ? spRef.Name : "EmptyShaderPropertyRef");
+						}
+						else
+						{
+							result.Append(prop.GetValue(this, null));
+						}
 					}
 
 					var fields = GetType().GetFields();
@@ -96,6 +114,48 @@ namespace ToonyColorsPro
 					}
 
 					return result.ToString();
+				}
+
+				string DebugSerializableProps()
+				{
+					var result = new StringBuilder();
+
+					var props = GetType().GetProperties();
+					foreach (var prop in props)
+					{
+						var attributes = prop.GetCustomAttributes(typeof(Serialization.SerializeAsAttribute), true);
+						if (attributes == null || attributes.Length == 0)
+						{
+							continue;
+						}
+
+						if (prop.PropertyType == typeof(ShaderProperty))
+						{
+							var spRef = (ShaderProperty)prop.GetValue(this, null);
+							result.AppendLine(prop.Name + " = " + spRef != null ? spRef.Name : "EmptyShaderPropertyRef");
+						}
+						else
+						{
+							result.AppendLine(prop.Name + " = " + prop.GetValue(this, null));
+						}
+					}
+
+					var fields = GetType().GetFields();
+					foreach (var field in fields)
+					{
+						if (field.Name == "guid") continue;
+						result.AppendLine(field.Name + " = " + field.GetValue(this));
+					}
+
+					return result.ToString();
+				}
+
+				void CompareToDefaultImplementation<T>() where T:Implementation
+				{
+					string current = DebugSerializableProps();
+					string def = GetDefaultImplementation<T>().DebugSerializableProps();
+					Debug.Log("Default:\n" + def);
+					Debug.Log("Current:\n" + current);
 				}
 
 				virtual public Implementation Clone()
@@ -130,6 +190,22 @@ namespace ToonyColorsPro
 
 				//Shader code output that declares the variables, if any
 				internal virtual string PrintVariableDeclare(string indent) { return null; }
+
+				//Shader code output that declares the variables that are incompatible with CBUFFER blocks
+				internal virtual string PrintVariableDeclareOutsideCBuffer(string indent) { return null; }
+
+				internal virtual string PrintVariableDeclare(string indent, bool gpuInstanced)
+				{
+					// Default behavior for GPU instancing: print declaration only if flags match
+					if ( (this.IsGpuInstanced && gpuInstanced) || (!this.IsGpuInstanced && !gpuInstanced) )
+					{
+						return PrintVariableDeclare(indent);
+					}
+					else
+					{
+						return null;
+					}
+				}
 
 				//Shader code output that represents the variable in the fragment shader
 				internal virtual string PrintVariableFragment(string inputSource, string outputSource, string arguments) { return null; }
@@ -222,7 +298,7 @@ namespace ToonyColorsPro
 				//system to ensure each property name is unique
 				public string GetPropertyName() { return PropertyName; }
 
-				[Serialization.SerializeAs("prop"), ExcludeFromCopy] protected string _PropertyName = "_ShaderProperty";
+				[Serialization.SerializeAs("prop"), ExcludeFromCopy] public string _PropertyName = "_ShaderProperty";
 				public string PropertyName
 				{
 					get { return _PropertyName; }
@@ -287,6 +363,11 @@ namespace ToonyColorsPro
 
 				protected abstract string PropertyTypeName();
 
+				protected string FetchVariable(string variableName)
+				{
+					return this.IsGpuInstanced ? string.Format("UNITY_ACCESS_INSTANCED_PROP(Props, {0})", variableName) : variableName;
+				}
+
 				internal override void NewLineGUI(bool usedByCustomCode)
 				{
 					BeginHorizontal();
@@ -331,10 +412,23 @@ namespace ToonyColorsPro
 					{
 						SGUILayout.InlineLabel("Variable");
 
-						//Only update if value is effectively changed, because we're calling a setter that loops through all ShaderProperties
-						var newName = SGUILayout.TextFieldShaderVariable(PropertyName);
+						Rect rect = SGUILayout.GetControlRect(SGUILayout.Styles.ShurikenValue);
+						Rect buttonRect = rect;
+						buttonRect.width = 18;
+						rect.xMin += buttonRect.width + 2;
+
+						if (GUI.Button(buttonRect, TCP2_GUI.TempContent(">", "Generate from Label"), SGUILayout.Styles.ShurikenMiniButtonFlexible))
+						{
+							PropertyName = string.Format("_{0}", this.Label);
+							//ShaderGenerator2.PushUndoState();
+						}
+
+						var newName = SGUILayout.TextFieldShaderVariable(rect, PropertyName);
 						if (newName != PropertyName)
+						{
+							// Only update if value is effectively changed, because we're calling a setter that loops through all ShaderProperties
 							PropertyName = newName;
+						}
 					}
 					EndHorizontal();
 
@@ -386,7 +480,7 @@ namespace ToonyColorsPro
 				internal override string PrintVariableFixedFunction() { return string.Format("[{0}]", PropertyName); }
 				internal override string PrintProperty(string indent) { return base.PrintProperty(indent) + string.Format(CultureInfo.InvariantCulture, "{0} (\"{1}\", Float) = {2}", PropertyName, Label, DefaultValue); }
 				internal override string PrintVariableDeclare(string indent) { return string.Format("float {0};", PropertyName); }
-				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments) { return PropertyName; }
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments) { return FetchVariable(PropertyName); }
 
 				internal override void NewLineGUI(bool usedByCustomCode)
 				{
@@ -423,7 +517,7 @@ namespace ToonyColorsPro
 				internal override string PrintVariableFixedFunction() { return string.Format("[{0}]", PropertyName); }
 				internal override string PrintProperty(string indent) { return base.PrintProperty(indent) + string.Format(CultureInfo.InvariantCulture, "{0} (\"{1}\", Range({3},{4})) = {2}", PropertyName, Label, DefaultValue, Min, Max); }
 				internal override string PrintVariableDeclare(string indent) { return string.Format("float {0};", PropertyName); }
-				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments) { return PropertyName; }
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments) { return FetchVariable(PropertyName); }
 
 				internal override void NewLineGUI(bool usedByCustomCode)
 				{
@@ -520,7 +614,7 @@ namespace ToonyColorsPro
 				{
 					var hideChannels = TryGetArgument("hide_channels", arguments);
 					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
-					return string.Format("{0}{1}", PropertyName, channels);
+					return string.Format("{0}{1}", FetchVariable(PropertyName), channels);
 				}
 
 				internal override void NewLineGUI(bool usedByCustomCode)
@@ -633,7 +727,7 @@ namespace ToonyColorsPro
 				{
 					var hideChannels = TryGetArgument("hide_channels", arguments);
 					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
-					return string.Format("{0}{1}", PropertyName, channels);
+					return string.Format("{0}{1}", FetchVariable(PropertyName), channels);
 				}
 
 				internal override void NewLineGUI(bool usedByCustomCode)
@@ -692,7 +786,16 @@ namespace ToonyColorsPro
 				internal override string GUILabel() { return MenuLabel; }
 				protected override string PropertyTypeName() { return "texture"; }
 
-				public override bool HasErrors { get { return base.HasErrors | (UseTilingOffset && invalidTilingOffsetVariable) | (UseScrolling && invalidScrollingVariable); } }
+				public override bool HasErrors
+				{
+					get
+					{
+						bool linkedSpErrors = UvSource == UvSourceType.OtherShaderProperty &&
+							( _linkedShaderProperty == null || (_linkedShaderProperty != null && !_linkedShaderProperty.IsVisible()) );
+
+						return base.HasErrors | linkedSpErrors | (UseTilingOffset && invalidTilingOffsetVariable) | (UseScrolling && invalidScrollingVariable);
+					}
+				}
 
 				public override void CheckErrors()
 				{
@@ -712,12 +815,45 @@ namespace ToonyColorsPro
 						list.Add(OptionFeatures.NoTile_Sampling);
 					}
 
+					if (UvSource == UvSourceType.Triplanar)
+					{
+						if (program == ProgramType.Vertex)
+						{
+							list.Add(OptionFeatures.Triplanar_Sampling_Vertex);
+						}
+						else
+						{
+							list.Add(OptionFeatures.Triplanar_Sampling);
+
+							if (LocalSpaceTriplanar)
+							{
+								list.Add(OptionFeatures.Triplanar_Sampling_Local);
+							}
+							else
+							{
+								list.Add(OptionFeatures.Triplanar_Sampling_Global);
+							}
+						}
+					}
+
 					if (RandomOffset)
 					{
 						list.Add(OptionFeatures.UV_Anim_Random_Offset);
 					}
 
-					if (UseScreenSpaceUV)
+					if (SineAnimation)
+					{
+						if (UvSource == UvSourceType.WorldPosition)
+						{
+							list.Add(OptionFeatures.UV_Anim_Sine_World);
+						}
+						else
+						{
+							list.Add(OptionFeatures.UV_Anim_Sine);
+						}
+					}
+
+					if (UvSource == UvSourceType.ScreenSpace)
 					{
 						list.Add(ScreenSpaceUVVertex ? OptionFeatures.Screen_Space_UV_Vertex : OptionFeatures.Screen_Space_UV_Fragment);
 
@@ -727,24 +863,37 @@ namespace ToonyColorsPro
 						}
 					}
 
-					if (UseWorldPosUV)
+					if (UvSource == UvSourceType.WorldPosition)
 					{
-						list.Add(OptionFeatures.World_Pos_UV);
+						list.Add((program == ProgramType.Vertex) ? OptionFeatures.World_Pos_UV_Vertex : OptionFeatures.World_Pos_UV_Fragment);
 					}
 
 					return list.ToArray();
 				}
 
+				public enum UvSourceType
+				{
+					Texcoord,
+					ScreenSpace,
+					WorldPosition,
+					OtherShaderProperty,
+					Triplanar
+				}
+
 				[Serialization.SerializeAs("uto")] public bool UseTilingOffset;
 				[Serialization.SerializeAs("tov")] public string TilingOffsetVariable = "";
+				[Serialization.SerializeAs("tov_lbl")] public string TilingOffsetVariableLabel = "";
 				[Serialization.SerializeAs("gto")] public bool GlobalTilingOffset;
 				[Serialization.SerializeAs("sbt")] public bool ScaleByTexelSize;
 				[Serialization.SerializeAs("scr")] public bool UseScrolling;
 				[Serialization.SerializeAs("scv")] public string ScrollingVariable = "";
+				[Serialization.SerializeAs("scv_lbl")] public string ScrollingVariableLabel = "";
 				[Serialization.SerializeAs("gsc")] public bool GlobalScrolling;
 				[Serialization.SerializeAs("roff")] public bool RandomOffset;
 				[Serialization.SerializeAs("goff")] public bool GlobalRandomOffset;
+				[Serialization.SerializeAs("sin_anm")] public bool SineAnimation;
 				[Serialization.SerializeAs("notile")] public bool NoTile;
+				[Serialization.SerializeAs("triplanar_local")] public bool LocalSpaceTriplanar;
 				[Serialization.SerializeAs("def")] public string DefaultValue = SGUILayout.Constants.DefaultTextureValues[0];
 				[Serialization.SerializeAs("locked_uv"), ExcludeFromCopy] public bool IsUvLocked;
 				[Serialization.SerializeAs("uv")] public int UvChannel;
@@ -752,11 +901,125 @@ namespace ToonyColorsPro
 				[Serialization.SerializeAs("chan")] public string Channels = "RGB";
 				[Serialization.SerializeAs("mip")] public int MipLevel = -1;
 				[Serialization.SerializeAs("mipprop")] public bool MipProperty;
-				[Serialization.SerializeAs("ssuv")] public bool UseScreenSpaceUV;
+				//[Serialization.SerializeAs("ssuv")] public bool UseScreenSpaceUV;
 				[Serialization.SerializeAs("ssuv_vert")] public bool ScreenSpaceUVVertex;
 				[Serialization.SerializeAs("ssuv_obj")] public bool ScreenSpaceUVObjectOffset;
-				[Serialization.SerializeAs("wpuv")] public bool UseWorldPosUV;
-				[Serialization.SerializeAs("wpuv_chan")] public string WorldPosUVChannels = "XZ";
+				//[Serialization.SerializeAs("wpuv")] public bool UseWorldPosUV;
+				[Serialization.SerializeAs("uv_type")] public UvSourceType UvSource = UvSourceType.Texcoord;
+				[Serialization.SerializeAs("uv_chan")] public string UVChannels = "XZ";
+				[Serialization.SerializeAs("uv_shaderproperty")] public string LinkedShaderPropertyName;
+				string UvChannelsOptions = "XYZ";
+
+				// ------------------------------------------------------------------------------------------------
+				// UV Other Shader Property mode
+
+				ShaderProperty _linkedShaderProperty;
+				public ShaderProperty LinkedShaderProperty
+				{
+					get { return _linkedShaderProperty; }
+					set
+					{
+						SetLinkedShaderProperty(value);
+					}
+				}
+				public List<ShaderProperty> Dependencies = new List<ShaderProperty>();
+
+				public void TryToFindLinkedShaderProperty()
+				{
+					if (string.IsNullOrEmpty(LinkedShaderPropertyName))
+					{
+						return;
+					}
+
+					if (ShaderGenerator2.CurrentConfig == null)
+					{
+						return;
+					}
+
+					var match = Array.Find(ShaderGenerator2.CurrentConfig.VisibleShaderProperties, sp => sp.Name == LinkedShaderPropertyName);
+					if (match != null)
+					{
+						SetLinkedShaderProperty(match);
+					}
+				}
+
+				void SetLinkedShaderProperty(ShaderProperty shaderProperty)
+				{
+					if (shaderProperty == LinkedShaderProperty)
+						return;
+
+					if (shaderProperty == ParentShaderProperty)
+					{
+						Debug.LogError(ShaderGenerator2.ErrorMsg("Shader Property Referenced implementation tried to reference its parent: '" + shaderProperty.Name + "'"));
+						return;
+					}
+
+					//build dependencies list to check cyclic references
+					Dependencies.Clear();
+					foreach (var imp in shaderProperty.implementations)
+					{
+						var impSpRef = imp as Imp_ShaderPropertyReference;
+						if (impSpRef != null)
+							Dependencies.AddRange(impSpRef.Dependencies);
+					}
+					if (Dependencies.Contains(shaderProperty))
+					{
+						//cyclic reference: can happen if a template has incorrect values
+						Debug.LogError(ShaderGenerator2.ErrorMsg("Cyclic reference between '" + this.ParentShaderProperty.Name + "' and '" + shaderProperty.Name + "'"));
+						return;
+					}
+					Dependencies.Add(shaderProperty);
+
+					//assign as new linked shader property
+					_linkedShaderProperty = shaderProperty;
+					LinkedShaderPropertyName = _linkedShaderProperty == null ? "" : _linkedShaderProperty.Name;
+
+					if (shaderProperty == null)
+					{
+						Debug.LogError(ShaderGenerator2.ErrorMsg("Referenced ShaderProperty is null"));
+						return;
+					}
+
+					//determine default swizzle value based on channels count & linked shader property available channels
+					bool sourceIsColor = shaderProperty.Type == VariableType.color || shaderProperty.Type == VariableType.color_rgba;
+					string options = sourceIsColor ? "RGBA" : "XYZW";
+					switch (shaderProperty.Type)
+					{
+						case VariableType.@float: UvChannelsOptions = "X"; break;
+						case VariableType.float2: UvChannelsOptions = "XY"; break;
+						case VariableType.float3: UvChannelsOptions = "XYZ"; break;
+						case VariableType.float4: UvChannelsOptions = "XYZW"; break;
+						case VariableType.color: UvChannelsOptions = "RGB"; break;
+						case VariableType.color_rgba: UvChannelsOptions = "RGBA"; break;
+					}
+
+					// set default channels, or preserve existing ones as far as possible (the implementation could have just been deserialized)
+					var prevChannels = UVChannels;
+					UVChannels = "";
+					for (int i = 0; i < 2; i++)
+					{
+						if (i < prevChannels.Length && options.Contains(prevChannels[i].ToString()))
+							UVChannels += prevChannels[i];
+						else
+							UVChannels += options[i % options.Length];
+					}
+				}
+
+				void OnSelectShaderProperty(object sp)
+				{
+					LinkedShaderProperty = sp as ShaderProperty;
+					ParentShaderProperty.CheckHash();
+					ShaderGenerator2.NeedsHashUpdate = true;
+				}
+
+				//Force updating the Shader Property hash once we've retrieved the correct Linked Shader Property
+				public void ForceUpdateParentDefaultHash()
+				{
+					ParentShaderProperty.ForceUpdateDefaultHash();
+				}
+
+				// ------------------------------------------------------------------------------------------------
+
 				string DefaultChannels = "RGB";
 
 				ProgramType program = ProgramType.Undefined;
@@ -822,29 +1085,72 @@ namespace ToonyColorsPro
 				public override void OnPasted()
 				{
 					InitChannelsCount();
+					TryToFindLinkedShaderProperty();
 				}
 
 				string GetMipValue()
 				{
-					return MipProperty ? PropertyName + "_Mip" : MipLevel.ToString();
+					return MipProperty ? FetchVariable(PropertyName + "_Mip") : MipLevel.ToString();
 				}
 
 				public void SetScreenSpaceUV()
 				{
-					UseScreenSpaceUV = true;
-					UvChannel = Array.IndexOf(SGUILayout.Constants.UvChannelOptions, SGUILayout.Constants.screenSpaceUVLabel);
+					UvSource = UvSourceType.ScreenSpace;
+					var uvLabelArray = program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions;
+					UvChannel = Array.IndexOf(uvLabelArray, SGUILayout.Constants.screenSpaceUVLabel);
+				}
+
+				public void SetWorldPositionUV()
+				{
+					UvSource = UvSourceType.WorldPosition;
+					UvChannelsOptions = "XYZ";
+					var uvLabelArray = program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions;
+					UvChannel = Array.IndexOf(uvLabelArray, SGUILayout.Constants.worldPosUVLabel);
+				}
+
+				public void SetTriplanarUV()
+				{
+					UvSource = UvSourceType.Triplanar;
+					var uvLabelArray = program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions;
+					UvChannel = Array.IndexOf(uvLabelArray, SGUILayout.Constants.triplanarUVLabel);
+				}
+
+				public void SetShaderPropertyUV()
+				{
+					UvSource = UvSourceType.OtherShaderProperty;
+					var uvLabelArray = program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions;
+					UvChannel = Array.IndexOf(uvLabelArray, SGUILayout.Constants.shaderPropertyUVLabel);
 				}
 
 				string GetUV(string input, string output, ProgramType programType)
 				{
-					if (UseScreenSpaceUV)
+					if (UvSource == UvSourceType.Triplanar)
+					{
+						return "triplanar";
+					}
+
+					if (UvSource == UvSourceType.ScreenSpace)
 					{
 						return "screenUV";
 					}
-					else if(UseWorldPosUV)
+					else if(UvSource == UvSourceType.WorldPosition)
 					{
-						bool isURP = ShaderGenerator2.TemplateID == "TEMPLATE_URP" || ShaderGenerator2.TemplateID == "TEMPLATE_LWRP";
-						return string.Format("{0}.{1}", isURP ? "positionWS" : input + ".worldPos", WorldPosUVChannels.ToLowerInvariant());
+						if (program == ProgramType.Vertex)
+						{
+							return string.Format("{0}.{1}", ShaderGenerator2.IsURP ? "worldPosUv" : "worldPosUv", UVChannels.ToLowerInvariant());
+						}
+						else
+						{
+							// assume Fragment
+							return string.Format("{0}.{1}", ShaderGenerator2.IsURP ? "positionWS" : input + ".worldPos", UVChannels.ToLowerInvariant());
+						}
+					}
+					else if (UvSource == UvSourceType.OtherShaderProperty)
+					{
+						if (LinkedShaderProperty.IsUsedInLightingFunction && ShaderGenerator2.CurrentPassHasLightingFunction)
+							return string.Format("{0}.{1}.{2}", output, LinkedShaderProperty.GetVariableName(), UVChannels.ToLowerInvariant());
+						else
+							return string.Format("{0}.{1}", LinkedShaderProperty.GetVariableName(), UVChannels.ToLowerInvariant());
 					}
 					else
 					{
@@ -874,6 +1180,11 @@ namespace ToonyColorsPro
 
 				public string GetDefaultTilingOffsetVariable()
 				{
+					return FetchVariable(GetTilingOffsetVariableName());
+				}
+
+				public string GetTilingOffsetVariableName()
+				{
 					return string.Format("{0}_ST", PropertyName);
 				}
 
@@ -892,6 +1203,11 @@ namespace ToonyColorsPro
 
 				public string GetDefaultScrollingVariable()
 				{
+					return FetchVariable(GetScrollingVariableName());
+				}
+
+				public string GetScrollingVariableName()
+				{
 					return string.Format("{0}_SC", PropertyName);
 				}
 
@@ -907,6 +1223,17 @@ namespace ToonyColorsPro
 					return this.UseScrolling && !this.GlobalScrolling && !this.UseCustomScrollingVariable();
 				}
 
+
+				public string GetDefaultOffsetSpeedVariable()
+				{
+					return FetchVariable(string.Format("{0}_OffsetSpeed", PropertyName));
+				}
+
+				public string GetDefaultSineAnimVariable()
+				{
+					// x: speed, y: amplitude, z: frequency, w: unused
+					return FetchVariable(string.Format("{0}_SinAnimParams", PropertyName));
+				}
 
 				/// <summary>
 				/// Verify that the tiling/offset & scrolling values are correct if they reference another implementation
@@ -938,7 +1265,13 @@ namespace ToonyColorsPro
 				{
 					public string value;
 					public string label;
+					public string valueLabel;
 					public string disabled;
+
+					public override string ToString()
+					{
+						return string.Format("[AvailableValue value: {0}, label: {1}, valueLabel: {2}, disabled: {3}]", value, label, valueLabel, disabled);
+					}
 				}
 
 				/// <summary>
@@ -946,7 +1279,7 @@ namespace ToonyColorsPro
 				/// </summary>
 				List<AvailableValue> FetchValidTilingOffsetValues()
 				{
-					return FetchValidValuesGeneric(imp => imp.HasValidTilingOffsetVariable(), imp => imp.GetDefaultTilingOffsetVariable());
+					return FetchValidValuesGeneric(imp => imp.HasValidTilingOffsetVariable(), imp => imp.GetDefaultTilingOffsetVariable(), imp => imp.GetTilingOffsetVariableName());
 				}
 
 				/// <summary>
@@ -954,11 +1287,11 @@ namespace ToonyColorsPro
 				/// </summary>
 				List<AvailableValue> FetchValidScrollingValues()
 				{
-					return FetchValidValuesGeneric(imp => imp.HasValidScrollingVariable(), imp => imp.GetDefaultScrollingVariable());
+					return FetchValidValuesGeneric(imp => imp.HasValidScrollingVariable(), imp => imp.GetDefaultScrollingVariable(), imp => imp.GetScrollingVariableName());
 				}
 
 				// Generic function to return available tiling/offset or scrolling variables
-				List<AvailableValue> FetchValidValuesGeneric(Func<Imp_MaterialProperty_Texture, bool> checkFunction, Func<Imp_MaterialProperty_Texture, string> valueFunction)
+				List<AvailableValue> FetchValidValuesGeneric(Func<Imp_MaterialProperty_Texture, bool> checkFunction, Func<Imp_MaterialProperty_Texture, string> valueFunction, Func<Imp_MaterialProperty_Texture, string> valueLabelFunction)
 				{
 					var list = new List<AvailableValue>();
 
@@ -986,6 +1319,7 @@ namespace ToonyColorsPro
 									{
 										value = valueFunction(imp_mp_text),
 										label = imp_mp_text.Label,
+										valueLabel = valueLabelFunction(imp_mp_text),
 										disabled = null
 									});
 								}
@@ -1005,6 +1339,7 @@ namespace ToonyColorsPro
 								{
 									value = valueFunction(imp_mp_ct),
 									label = imp_mp_ct.Label,
+									valueLabel = valueLabelFunction(imp_mp_ct),
 									disabled = imp_mp_ct.IsCustomMaterialPropertyReferenced() ? null : "(unused Custom Material Property)"
 								});
 							}
@@ -1022,39 +1357,63 @@ namespace ToonyColorsPro
 					if (UseScrolling && !UseCustomScrollingVariable())
 						prop += string.Format("\n{0}[TCP2UVScrolling] {1}_SC (\"{2} UV Scrolling\", Vector) = (1,1,0,0)", indent, PropertyName, Label);
 					if (RandomOffset)
-						prop += string.Format("\n{0}{1}_OffsetSpeed (\"{2} UV Offset Speed\", Float) = 120", indent, PropertyName, Label);
+						prop += string.Format("\n{0}{1} (\"{2} UV Offset Speed\", Float) = 120", indent, GetDefaultOffsetSpeedVariable(), Label);
+					if (SineAnimation)
+						prop += string.Format("\n{0}[TCP2Vector4FloatsDrawer(Speed,Amplitude,Frequency,Offset)] {1} (\"{2} UV Sine Distortion Parameters\", Float) = (1, 0.05, 1, 0)", indent, GetDefaultSineAnimVariable(), Label);
 					if (MipProperty)
 						prop += string.Format("\n{0}{1}_Mip (\"{2} Mip Level\", Range(0,10)) = 0", indent, PropertyName, Label);
 					return prop;
 				}
+				internal override string PrintVariableDeclareOutsideCBuffer(string indent)
+				{
+					return string.Format("sampler2D {0};", PropertyName);
+				}
 				internal override string PrintVariableDeclare(string indent)
 				{
-					var result = string.Format("sampler2D {0};\n", PropertyName);
+					string properties = "";
 					if (UseTilingOffset && !UseCustomTilingOffsetVariable())
-						result += string.Format("{0}float4 {1}_ST;\n", indent, PropertyName);
+						properties += string.Format("{0}float4 {1}_ST;\n", indent, PropertyName);
 					if (ScaleByTexelSize)
-						result += string.Format("{0}float4 {1}_TexelSize;\n", indent, PropertyName);
+						properties += string.Format("{0}float4 {1}_TexelSize;\n", indent, PropertyName);
 					if (UseScrolling && !UseCustomScrollingVariable())
-						result += string.Format("{0}float4 {1}_SC;\n", indent, PropertyName);
+						properties += string.Format("{0}half4 {1}_SC;\n", indent, PropertyName);
 					if (RandomOffset)
-						result += string.Format("{0}float {1}_OffsetSpeed;\n", indent, PropertyName);
+						properties += string.Format("{0}half {1};\n", indent, GetDefaultOffsetSpeedVariable());
+					if (SineAnimation)
+						properties += string.Format("{0}half4 {1};\n", indent, GetDefaultSineAnimVariable());
 					if (MipProperty)
-						result += string.Format("{0}fixed {1}_Mip;\n", indent, PropertyName);
-					return result.TrimEnd('\n');
+						properties += string.Format("{0}fixed {1}_Mip;\n", indent, PropertyName);
+					properties = properties.TrimEnd('\n');
+					return string.IsNullOrEmpty(properties) ? null : properties;
 				}
 				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
 				{
 					var tilingOffsetVariable = UseCustomTilingOffsetVariable() ? TilingOffsetVariable : GetDefaultTilingOffsetVariable();
 					var tilingMod = ScaleByTexelSize ? string.Format(" * {0}_TexelSize.xy", PropertyName) : "";
-					if (UseScreenSpaceUV)
+					if (UvSource == UvSourceType.ScreenSpace)
 					{
 						tilingMod += ScaleByTexelSize ? " * _ScreenParams.xy" : " * _ScreenParams.zw";
 					}
-					tilingMod += (UseTilingOffset && (!GlobalTilingOffset || UseScreenSpaceUV || UseWorldPosUV)) ? string.Format(" * {0}.xy", tilingOffsetVariable) : "";
-					var offsetMod = (UseTilingOffset && (!GlobalTilingOffset || UseScreenSpaceUV || UseWorldPosUV)) ? string.Format(" + {0}.zw", tilingOffsetVariable) : "";
+					tilingMod += (UseTilingOffset && (!GlobalTilingOffset || UvSource != UvSourceType.Texcoord)) ? string.Format(" * {0}.xy", tilingOffsetVariable) : "";
+					var offsetMod = (UseTilingOffset && (!GlobalTilingOffset || UvSource != UvSourceType.Texcoord)) ? string.Format(" + {0}.zw", tilingOffsetVariable) : "";
 					var scrollingVariable = UseCustomScrollingVariable() ? ScrollingVariable : GetDefaultScrollingVariable();
 					var scrollingMod = (UseScrolling && !GlobalScrolling) ? string.Format(" + {1}(_Time.yy * {0}.xy)", scrollingVariable, NoTile ? "" : "frac") : "";
-					var randomOffsetMod = (RandomOffset && !GlobalRandomOffset) ? string.Format(" + hash22(floor(_Time.xx * {0}_OffsetSpeed.xx) / {0}_OffsetSpeed.xx)", PropertyName) : "";
+					var randomOffsetMod = (RandomOffset && !GlobalRandomOffset) ? string.Format(" + hash22(floor(_Time.xx * {0}.xx) / {0}.xx)", GetDefaultOffsetSpeedVariable()) : "";
+
+					string uvSineMod;
+					if (SineAnimation)
+					{
+						string uvSinVariable = string.Format("uvSinAnim_{0}", PropertyName);
+						string uvSinPos = UvSource == UvSourceType.WorldPosition ? "sinUvAnimVertexWorldPos" : "sinUvAnimVertexPos";
+						string uvSinInput = string.Format("{0}.{1}", inputSource, ShaderGenerator2.IsURP ? "[[INPUT_VALUE:" + uvSinPos + "]]" : uvSinPos);
+						string uvSinCalculation = string.Format("float2 {0} = ({1} * {2}.z) + (_Time.yy * {2}.x);", uvSinVariable, uvSinInput, GetDefaultSineAnimVariable());
+						ShaderGenerator2.AppendLineBefore(uvSinCalculation);
+						uvSineMod = string.Format(" + (((sin(0.9 * {0} + {1}.w) + sin(1.33 * {0} + 3.14 * {1}.w) + sin(2.4 * {0} + 5.3 * {1}.w)) / 3) * {1}.y)", uvSinVariable, GetDefaultSineAnimVariable());
+					}
+					else
+					{
+						uvSineMod = "";
+					}
 
 					// uv coordinates
 					string coords = null;
@@ -1072,31 +1431,121 @@ namespace ToonyColorsPro
 					}
 
 					// function
-					var function = NoTile ? "tex2D_noTile" : "tex2D";
+					string function = NoTile ? "tex2D_noTile" : "tex2D";
 
 					// channels
 					var hideChannels = TryGetArgument("hide_channels", arguments);
 					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
 
-					return string.Format("{0}({1}, {2}{3}{4}{5}{6}){7}", function, PropertyName, coords, tilingMod, scrollingMod, offsetMod, randomOffsetMod, channels);
+					if (UvSource == UvSourceType.Triplanar)
+					{
+						function = NoTile ? "tex2D_triplanar_noTile" : "tex2D_triplanar";
+
+						bool useTilingOffset = ((UseTilingOffset && (!GlobalTilingOffset || UvSource != UvSourceType.Texcoord)));
+						string texelScaling = ScaleByTexelSize ? string.Format(" * {0}_TexelSize.xy", PropertyName) : "";
+						string triplanarTiling = useTilingOffset ? tilingOffsetVariable + ".xy" : "float2(1,1)";
+						string triplanarOffset = useTilingOffset ? tilingOffsetVariable + ".zw" : "float2(0,0)";
+
+						string triplanarTilingOffset;
+						if (scrollingMod != "" || randomOffsetMod != "" || texelScaling != "" || uvSineMod != "")
+						{
+							triplanarTilingOffset = string.Format("float4({0}{5}, {1}{2}{3}{4})", triplanarTiling, triplanarOffset, scrollingMod, randomOffsetMod, uvSineMod, texelScaling);
+						}
+						else
+						{
+							triplanarTilingOffset = useTilingOffset ? tilingOffsetVariable : "float4(1,1,0,0)";
+						}
+
+						// figure out position/normal input values
+						string worldPositionInput;
+						string worldNormalInput;
+						if (LocalSpaceTriplanar)
+						{
+							worldPositionInput = inputSource + ".[[INPUT_VALUE:objPos]]";
+							worldNormalInput = inputSource + ".[[INPUT_VALUE:objNormal]]";
+						}
+						else
+						{
+							worldPositionInput = ShaderGenerator2.IsURP ? "positionWS" : inputSource + ".[[INPUT_VALUE:worldPos]]";
+							worldNormalInput = ShaderGenerator2.IsURP ? "normalWS" : inputSource + ".[[INPUT_VALUE:worldNormal]]";
+						}
+
+						return string.Format("{0}({1}, {2}, {3}, {4})", function, PropertyName, triplanarTilingOffset, worldPositionInput, worldNormalInput);
+					}
+
+					return string.Format("{0}({1}, {2}{3}{4}{5}{6}{7}){8}", function, PropertyName, coords, tilingMod, scrollingMod, offsetMod, randomOffsetMod, uvSineMod, channels);
 				}
 				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
 				{
 					var tilingOffsetVariable = UseCustomTilingOffsetVariable() ? TilingOffsetVariable : GetDefaultTilingOffsetVariable();
 					var tilingMod = ScaleByTexelSize ? string.Format(" * {0}_TexelSize.xy", PropertyName) : "";
-					if (UseScreenSpaceUV)
+					if (UvSource == UvSourceType.ScreenSpace)
 					{
 						tilingMod += ScaleByTexelSize ? " * _ScreenParams.xy" : " * _ScreenParams.zw";
 					}
-					tilingMod += (UseTilingOffset && (!GlobalTilingOffset || UseScreenSpaceUV || UseWorldPosUV)) ? string.Format(" * {0}.xy", tilingOffsetVariable) : "";
-					var offsetMod = (UseTilingOffset && (!GlobalTilingOffset || UseScreenSpaceUV || UseWorldPosUV)) ? string.Format(" + {0}.zw", tilingOffsetVariable) : "";
+					tilingMod += (UseTilingOffset && (!GlobalTilingOffset || UvSource != UvSourceType.Texcoord)) ? string.Format(" * {0}.xy", tilingOffsetVariable) : "";
+					var offsetMod = (UseTilingOffset && (!GlobalTilingOffset || UvSource != UvSourceType.Texcoord)) ? string.Format(" + {0}.zw", tilingOffsetVariable) : "";
 					var scrollingVariable = UseCustomScrollingVariable() ? ScrollingVariable : GetDefaultScrollingVariable();
 					var scrollingMod = (UseScrolling && !GlobalScrolling) ? string.Format(" + {1}(_Time.yy * {0}.xy)", scrollingVariable, NoTile ? "" : "frac") : "";
-					var randomOffsetMod = (RandomOffset && !GlobalRandomOffset) ? string.Format(" + hash22(floor(_Time.xx * {0}_OffsetSpeed.xx) / {0}_OffsetSpeed.xx)", PropertyName) : "";
-					var coords = GetUV(inputSource, outputSource, ProgramType.Vertex);
+					var randomOffsetMod = (RandomOffset && !GlobalRandomOffset) ? string.Format(" + hash22(floor(_Time.xx * {0}.xx) / {0}.xx)", GetDefaultOffsetSpeedVariable()) : "";
+
+					string uvSineMod;
+					if (SineAnimation)
+					{
+						string uvSinVariable = string.Format("uvSinAnim_{0}", PropertyName);
+						string uvSinInput = UvSource == UvSourceType.WorldPosition ? "sinUvAnimVertexWorldPos" : "sinUvAnimVertexPos";
+						string uvSinCalculation = string.Format("float2 {0} = ({1} * {2}.z) + (_Time.yy * {2}.x);", uvSinVariable, uvSinInput, GetDefaultSineAnimVariable());
+						ShaderGenerator2.AppendLineBefore(uvSinCalculation);
+						uvSineMod = string.Format(" + (((sin(0.9 * {0} + {1}.w) + sin(1.33 * {0} + 3.14 * {1}.w) + sin(2.4 * {0} + 5.3 * {1}.w)) / 3) * {1}.y)", uvSinVariable, GetDefaultSineAnimVariable());
+					}
+					else
+					{
+						uvSineMod = "";
+					}
+
+
+					// uv coordinates
+					string coords = null;
+					if (!string.IsNullOrEmpty(arguments))
+					{
+						var uv = TryGetArgument("uv", arguments);
+						if (uv != null)
+						{
+							coords = uv;
+						}
+					}
+					if (coords == null)
+					{
+						coords = GetUV(inputSource, outputSource, ProgramType.Vertex);
+					}
 					var hideChannels = TryGetArgument("hide_channels", arguments);
 					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
-					return string.Format("tex2Dlod({0}, float4({1}{2}{3}{4}{5}, 0, {6})){7}", PropertyName, coords, tilingMod, scrollingMod, offsetMod, randomOffsetMod, GetMipValue(), channels);
+
+					if (UvSource == UvSourceType.Triplanar)
+					{
+						string function = NoTile ? "tex2Dlod_triplanar_noTile" : "tex2Dlod_triplanar";
+
+						bool useTilingOffset = UseTilingOffset && !GlobalTilingOffset;
+						string triplanarTiling = useTilingOffset ? tilingOffsetVariable + ".xy" : "float2(1,1)";
+						string triplanarOffset = useTilingOffset ? tilingOffsetVariable + ".zw" : "float2(0,0)";
+
+						string triplanarTilingOffset;
+						if (scrollingMod != "" || randomOffsetMod != "" || uvSineMod != "")
+						{
+							triplanarTilingOffset = string.Format("float4({0}, {1}{2}{3}{4})", triplanarTiling, triplanarOffset, scrollingMod, randomOffsetMod, uvSineMod);
+						}
+						else
+						{
+							triplanarTilingOffset = useTilingOffset ? tilingOffsetVariable : "float4(1,1,0,0)";
+						}
+
+						string worldPositionInput = LocalSpaceTriplanar ? "v.vertex.xyz" : "worldPosUv";
+						string worldNormalInput = LocalSpaceTriplanar ? "v.normal.xyz" : "worldNormalUv";
+
+						return string.Format("{0}({1}, {2}, {3}, {4}, {5})", function, PropertyName, triplanarTilingOffset, GetMipValue(), worldPositionInput, worldNormalInput);
+					}
+
+					return string.Format("tex2Dlod({0}, float4({1}{2}{3}{4}{5}{6}, 0, {7})){8}", PropertyName, coords, tilingMod, scrollingMod, offsetMod, randomOffsetMod, uvSineMod, GetMipValue(), channels);
 				}
 
 				internal override void NewLineGUI(bool usedByCustomCode)
@@ -1169,21 +1618,43 @@ namespace ToonyColorsPro
 						}
 						else
 						{
-							UvChannel = SGUILayout.Popup(UvChannel, program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions);
+							var uvLabelArray = program == ProgramType.Vertex ? SGUILayout.Constants.UvChannelOptionsVertex : SGUILayout.Constants.UvChannelOptions;
+							UvChannel = SGUILayout.Popup(UvChannel, uvLabelArray);
 							if (GUI.changed)
 							{
-								UseScreenSpaceUV = Array.IndexOf(SGUILayout.Constants.UvChannelOptions, SGUILayout.Constants.screenSpaceUVLabel) == UvChannel && !IsUvLocked;
-								UseWorldPosUV = Array.IndexOf(SGUILayout.Constants.UvChannelOptions, SGUILayout.Constants.worldPosUVLabel) == UvChannel && !IsUvLocked;
+								if (Array.IndexOf(uvLabelArray, SGUILayout.Constants.screenSpaceUVLabel) == UvChannel && !IsUvLocked)
+								{
+									UvSource = UvSourceType.ScreenSpace;
+								}
+								else if (Array.IndexOf(uvLabelArray, SGUILayout.Constants.worldPosUVLabel) == UvChannel && !IsUvLocked)
+								{
+									UvSource = UvSourceType.WorldPosition;
+									UvChannelsOptions = "XYZ";
+								}
+								else if (Array.IndexOf(uvLabelArray, SGUILayout.Constants.shaderPropertyUVLabel) == UvChannel && !IsUvLocked)
+								{
+									UvSource = UvSourceType.OtherShaderProperty;
+									UvChannelsOptions = "XXX";
+								}
+								else if (Array.IndexOf(uvLabelArray, SGUILayout.Constants.triplanarUVLabel) == UvChannel && !IsUvLocked)
+								{
+									UvSource = UvSourceType.Triplanar;
+									UvChannelsOptions = "XXX";
+								}
+								else
+								{
+									UvSource = UvSourceType.Texcoord;
+								}
 							}
 						}
 
-						if (UseWorldPosUV)
+						if (UvSource == UvSourceType.WorldPosition || UvSource == UvSourceType.OtherShaderProperty)
 						{
 							var gc = TCP2_GUI.TempContent(".");
 							var rect = GUILayoutUtility.GetRect(gc, EditorStyles.label, GUILayout.ExpandWidth(false));
 							rect.y -= 2;
 							GUI.Label(rect, gc);
-							WorldPosUVChannels = SGUILayout.GenericSwizzle(WorldPosUVChannels, 2, "XYZ", 30, showAvailableChannels: false);
+							UVChannels = SGUILayout.GenericSwizzle(UVChannels, 2, UvChannelsOptions, 30, showAvailableChannels: false);
 						}
 					}
 					EndHorizontal();
@@ -1192,7 +1663,7 @@ namespace ToonyColorsPro
 					{
 						//SGUILayout.Indent += 10;
 
-						bool showScreenSpaceUVOptions = UseScreenSpaceUV;
+						bool showScreenSpaceUVOptions = UvSource == UvSourceType.ScreenSpace;
 						if (GlobalOptions.data.ShowDisabledFeatures || showScreenSpaceUVOptions)
 						{
 							using (new EditorGUI.DisabledGroupScope(!showScreenSpaceUVOptions))
@@ -1200,7 +1671,7 @@ namespace ToonyColorsPro
 								BeginHorizontal();
 								{
 									bool highlighted = !IsDefaultImplementation ? ScreenSpaceUVVertex : ScreenSpaceUVVertex != GetDefaultImplementation<Imp_MaterialProperty_Texture>().ScreenSpaceUVVertex;
-									SGUILayout.InlineLabel("└─  Vertex SSUV", "Calculate the screen space UV in the vertex shader, faster but can appear distorted", highlighted);
+									SGUILayout.InlineLabel("└   Vertex SSUV", "Calculate the screen space UV in the vertex shader, faster but can appear distorted", highlighted);
 									ScreenSpaceUVVertex = SGUILayout.Toggle(ScreenSpaceUVVertex);
 								}
 								EndHorizontal();
@@ -1210,13 +1681,29 @@ namespace ToonyColorsPro
 									BeginHorizontal();
 									{
 										bool highlighted = !IsDefaultImplementation ? ScreenSpaceUVObjectOffset : ScreenSpaceUVObjectOffset != GetDefaultImplementation<Imp_MaterialProperty_Texture>().ScreenSpaceUVObjectOffset;
-										SGUILayout.InlineLabel("└─  Obj Offset SSUV", "Align the UV with the object's pivot, so that the texture doesn't appear fixed on the screen (remove the 'shower door' effect)", highlighted);
+										SGUILayout.InlineLabel("└   Obj Offset SSUV", "Align the UV with the object's pivot, so that the texture doesn't appear fixed on the screen (remove the 'shower door' effect)", highlighted);
 										ScreenSpaceUVObjectOffset = SGUILayout.Toggle(ScreenSpaceUVObjectOffset);
 									}
 									EndHorizontal();
 								}
 							}
 						}
+
+						bool showTriplanarUvOptions = UvSource == UvSourceType.Triplanar;
+						if (GlobalOptions.data.ShowDisabledFeatures || showTriplanarUvOptions)
+						{
+							using (new EditorGUI.DisabledGroupScope(!showTriplanarUvOptions))
+							{
+								BeginHorizontal();
+								{
+									bool highlighted = !IsDefaultImplementation ? LocalSpaceTriplanar : LocalSpaceTriplanar != GetDefaultImplementation<Imp_MaterialProperty_Texture>().LocalSpaceTriplanar;
+									SGUILayout.InlineLabel("└   Object Space", "Calculate the Triplanar UV in object space instead of world space", highlighted);
+									LocalSpaceTriplanar = SGUILayout.Toggle(LocalSpaceTriplanar);
+								}
+								EndHorizontal();
+							}
+						}
+
 
 						BeginHorizontal();
 						{
@@ -1226,7 +1713,7 @@ namespace ToonyColorsPro
 						}
 						EndHorizontal();
 
-						bool showTilingOptions = UseTilingOffset && !UseScreenSpaceUV && !UseWorldPosUV;
+						bool showTilingOptions = UseTilingOffset && UvSource == UvSourceType.Texcoord;
 						if ((GlobalOptions.data.ShowDisabledFeatures || showTilingOptions) && !IsUvLocked)
 						{
 							using (new EditorGUI.DisabledGroupScope(!showTilingOptions))
@@ -1234,14 +1721,14 @@ namespace ToonyColorsPro
 								BeginHorizontal();
 								{
 									bool highlighted = !IsDefaultImplementation ? GlobalTilingOffset : GlobalTilingOffset != GetDefaultImplementation<Imp_MaterialProperty_Texture>().GlobalTilingOffset;
-									SGUILayout.InlineLabel("└─  Global", "Makes the tiling/offset values global to the selected UV coordinates: all textures using the same UV coordinates will inherit the tiling/offset values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).\n\nDoes not apply to screen space UV coordinates.", highlighted);
+									SGUILayout.InlineLabel("└   Global", "Makes the tiling/offset values global to the selected UV coordinates: all textures using the same UV coordinates will inherit the tiling/offset values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).\n\nDoes not apply to screen space UV coordinates.", highlighted);
 									GlobalTilingOffset = SGUILayout.Toggle(GlobalTilingOffset);
 								}
 								EndHorizontal();
 							}
 						}
 
-						showTilingOptions = UseTilingOffset && !(!UseScreenSpaceUV && !UseWorldPosUV && GlobalTilingOffset);
+						showTilingOptions = UseTilingOffset && !(UvSource == UvSourceType.Texcoord && GlobalTilingOffset);
 						if ((GlobalOptions.data.ShowDisabledFeatures || showTilingOptions))
 						{
 							using (new EditorGUI.DisabledGroupScope(!showTilingOptions))
@@ -1249,21 +1736,21 @@ namespace ToonyColorsPro
 								BeginHorizontal();
 								{
 									bool highlighted = !IsDefaultImplementation ? UseCustomTilingOffsetVariable() : TilingOffsetVariable != GetDefaultImplementation<Imp_MaterialProperty_Texture>().TilingOffsetVariable;
-									SGUILayout.InlineLabel("└─  Variable", "Defines the tiling/offset uniform variable.\nBy default, a new property will be created for this texture, however you can use another texture's tiling/offset variable so that this texture will be linked with it. You would typically do that if you have a normal map coupled with an albedo map, for example.", highlighted);
-									var tilingOffsetVar = UseCustomTilingOffsetVariable() ? TilingOffsetVariable : GetDefaultTilingOffsetVariable();
+									SGUILayout.InlineLabel("└   Variable", "Defines the tiling/offset uniform variable.\nBy default, a new property will be created for this texture, however you can use another texture's tiling/offset variable so that this texture will be linked with it. You would typically do that if you have a normal map coupled with an albedo map, for example.", highlighted);
+									var tilingOffsetVar = UseCustomTilingOffsetVariable() ? TilingOffsetVariableLabel : GetTilingOffsetVariableName();
 									if (SGUILayout.ButtonPopup(tilingOffsetVar))
 									{
 										var menu = new GenericMenu();
-										string label = string.Format("{0}: {1}", ParentShaderProperty.Name, GetDefaultTilingOffsetVariable()); // note: has non-breaking space character
-
+										string label = string.Format("{0}: {1}", ParentShaderProperty.Name, GetTilingOffsetVariableName()); // note: has non-breaking space character
 										if (ParentShaderProperty.Name == "_CustomMaterialPropertyDummy") // TODO get rid of the dummy shader property for custom material properties?
 										{
-											label = GetDefaultTilingOffsetVariable();
+											label = GetTilingOffsetVariableName();
 										}
 
 										menu.AddItem(new GUIContent(label), !UseCustomTilingOffsetVariable(), () =>
 										{
 											TilingOffsetVariable = "";
+											TilingOffsetVariableLabel = "";
 											invalidTilingOffsetVariable = false;
 										});
 
@@ -1281,11 +1768,12 @@ namespace ToonyColorsPro
 											{
 												itemList.Add(new MenuItem()
 												{
-													guiContent = new GUIContent(string.Format("{0}: {1}", availableValue.label, availableValue.value)), // note: has non-breaking space character
+													guiContent = new GUIContent(string.Format("{0}: {1}", availableValue.label, availableValue.valueLabel)), // note: has non-breaking space character
 													on = this.TilingOffsetVariable == availableValue.value,
 													menuFunction = () =>
 													{
 														TilingOffsetVariable = availableValue.value;
+														TilingOffsetVariableLabel = availableValue.valueLabel;
 														invalidTilingOffsetVariable = false;
 													}
 												});
@@ -1294,7 +1782,7 @@ namespace ToonyColorsPro
 											{
 												itemList.Add(new MenuItem()
 												{
-													guiContent = new GUIContent(string.Format("{0}: {1} {2}", availableValue.label, availableValue.value, availableValue.disabled)), // note: has non-breaking space character
+													guiContent = new GUIContent(string.Format("{0}: {1} {2}", availableValue.label, availableValue.valueLabel, availableValue.disabled)), // note: has non-breaking space character
 													on = this.TilingOffsetVariable == availableValue.value,
 													disabled = true
 												});
@@ -1325,7 +1813,7 @@ namespace ToonyColorsPro
 								BeginHorizontal();
 								{
 									bool highlighted = !IsDefaultImplementation ? ScaleByTexelSize : ScaleByTexelSize != GetDefaultImplementation<Imp_MaterialProperty_Texture>().ScaleByTexelSize;
-									SGUILayout.InlineLabel("└─  Scale by Texel Size", "Will scale the UV by the texture's texel size. Usually useful to get pixel-perfect screen space UV mapping on the screen.", highlighted);
+									SGUILayout.InlineLabel("└   Scale by Texel Size", "Will scale the UV by the texture's texel size. Usually useful to get pixel-perfect screen space UV mapping on the screen.", highlighted);
 									ScaleByTexelSize = SGUILayout.Toggle(ScaleByTexelSize);
 								}
 								EndHorizontal();
@@ -1334,41 +1822,43 @@ namespace ToonyColorsPro
 
 						BeginHorizontal();
 						{
-							bool highlighted = !IsDefaultImplementation ? UseScrolling || RandomOffset : (UseScrolling != GetDefaultImplementation<Imp_MaterialProperty_Texture>().UseScrolling || RandomOffset != GetDefaultImplementation<Imp_MaterialProperty_Texture>().RandomOffset);
+							bool highlighted = !IsDefaultImplementation ? UseScrolling || RandomOffset || SineAnimation : (UseScrolling != GetDefaultImplementation<Imp_MaterialProperty_Texture>().UseScrolling || RandomOffset != GetDefaultImplementation<Imp_MaterialProperty_Texture>().RandomOffset || SineAnimation != GetDefaultImplementation<Imp_MaterialProperty_Texture>().SineAnimation);
 							SGUILayout.InlineLabel("UV Animation", highlighted);
-							int choice = UseScrolling ? 1 : (RandomOffset ? 2 : 0);
+							int choice = UseScrolling ? 1 : (RandomOffset ? 2 : (SineAnimation ? 3 : 0));
 							int new_choice = SGUILayout.Popup(choice, SGUILayout.Constants.UvAnimationOptions);
 							if (new_choice != choice)
 							{
 								UseScrolling = false;
 								RandomOffset = false;
+								SineAnimation = false;
 
 								switch (new_choice)
 								{
 									case 1: UseScrolling = true; break;
 									case 2: RandomOffset = true; break;
+									case 3: SineAnimation = true; break;
 								}
 							}
 						}
 						EndHorizontal();
 
-						bool showScrollingOptions = (UseScrolling || RandomOffset) && !UseScreenSpaceUV && !UseWorldPosUV;
-						if ((GlobalOptions.data.ShowDisabledFeatures || showScrollingOptions) && !IsUvLocked)
+						bool showUvAnimationOptions = (UseScrolling || RandomOffset || SineAnimation) && UvSource == UvSourceType.Texcoord;
+						if ((GlobalOptions.data.ShowDisabledFeatures || showUvAnimationOptions) && !IsUvLocked)
 						{
-							using (new EditorGUI.DisabledGroupScope(!showScrollingOptions))
+							using (new EditorGUI.DisabledGroupScope(!showUvAnimationOptions))
 							{
 								if (UseScrolling)
 								{
 									BeginHorizontal();
 									{
 										bool highlighted = !IsDefaultImplementation ? GlobalScrolling : GlobalScrolling != GetDefaultImplementation<Imp_MaterialProperty_Texture>().GlobalScrolling;
-										SGUILayout.InlineLabel("└─  Global", "Makes the scrolling global to the selected UV coordinates: all textures using the same UV coordinates will inherit the scrolling animation and values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).", highlighted);
+										SGUILayout.InlineLabel("└   Global", "Makes the scrolling global to the selected UV coordinates: all textures using the same UV coordinates will inherit the scrolling animation and values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).", highlighted);
 										GlobalScrolling = SGUILayout.Toggle(GlobalScrolling);
 										GlobalRandomOffset = GlobalScrolling;
 									}
 									EndHorizontal();
 
-									bool showScrollingVariable = UseScrolling && !(!UseScreenSpaceUV && !UseWorldPosUV && GlobalScrolling);
+									bool showScrollingVariable = UseScrolling && !(UvSource == UvSourceType.Texcoord && GlobalScrolling);
 									if ((GlobalOptions.data.ShowDisabledFeatures || showScrollingVariable))
 									{
 										using (new EditorGUI.DisabledGroupScope(!showScrollingVariable))
@@ -1376,20 +1866,21 @@ namespace ToonyColorsPro
 											BeginHorizontal();
 											{
 												bool highlighted = !IsDefaultImplementation ? UseCustomScrollingVariable() : ScrollingVariable != GetDefaultImplementation<Imp_MaterialProperty_Texture>().ScrollingVariable;
-												SGUILayout.InlineLabel("└─  Variable", "Defines the scrolling uniform variable.\nBy default, a new property will be created for this texture, however you can use another texture's scrolling variable so that this texture will be linked with it.", highlighted);
-												var scrollingVar = UseCustomScrollingVariable() ? ScrollingVariable : GetDefaultScrollingVariable();
+												SGUILayout.InlineLabel("└   Variable", "Defines the scrolling uniform variable.\nBy default, a new property will be created for this texture, however you can use another texture's scrolling variable so that this texture will be linked with it.", highlighted);
+												var scrollingVar = UseCustomScrollingVariable() ? ScrollingVariableLabel : GetScrollingVariableName();
 												if (SGUILayout.ButtonPopup(scrollingVar))
 												{
 													var menu = new GenericMenu();
-													string label = string.Format("{0}: {1}", ParentShaderProperty.Name, GetDefaultScrollingVariable());
+													string label = string.Format("{0}: {1}", ParentShaderProperty.Name, GetScrollingVariableName());
 													if (ParentShaderProperty.Name == "_CustomMaterialPropertyDummy") // TODO get rid of the dummy shader property for custom material properties
 													{
-														label = GetDefaultScrollingVariable();
+														label = GetScrollingVariableName();
 													}
 
 													menu.AddItem(new GUIContent(label), !UseCustomScrollingVariable(), () =>
 													{
 														ScrollingVariable = "";
+														ScrollingVariableLabel = "";
 														invalidScrollingVariable = false;
 													});
 
@@ -1407,11 +1898,12 @@ namespace ToonyColorsPro
 														{
 															itemList.Add(new MenuItem()
 															{
-																guiContent = new GUIContent(string.Format("{0}: {1}", availableValue.label, availableValue.value)), // note: has non-breaking space character
+																guiContent = new GUIContent(string.Format("{0}: {1}", availableValue.label, availableValue.valueLabel)), // note: has non-breaking space character
 																on = this.ScrollingVariable == availableValue.value,
 																menuFunction = () =>
 																{
 																	ScrollingVariable = availableValue.value;
+																	ScrollingVariableLabel = availableValue.valueLabel;
 																	invalidScrollingVariable = false;
 																}
 															});
@@ -1420,7 +1912,7 @@ namespace ToonyColorsPro
 														{
 															itemList.Add(new MenuItem()
 															{
-																guiContent = new GUIContent(string.Format("{0}: {1} {2}", availableValue.label, availableValue.value, availableValue.disabled)), // note: has non-breaking space character
+																guiContent = new GUIContent(string.Format("{0}: {1} {2}", availableValue.label, availableValue.valueLabel, availableValue.disabled)), // note: has non-breaking space character
 																on = this.ScrollingVariable == availableValue.value,
 																disabled = true
 															});
@@ -1455,11 +1947,15 @@ namespace ToonyColorsPro
 									BeginHorizontal();
 									{
 										bool highlighted = !IsDefaultImplementation ? GlobalRandomOffset : GlobalRandomOffset != GetDefaultImplementation<Imp_MaterialProperty_Texture>().GlobalRandomOffset;
-										SGUILayout.InlineLabel("└─  Global", "Makes the random offset global to the selected UV coordinates: all textures using the same UV coordinates will inherit the random offset animation and values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).", highlighted);
+										SGUILayout.InlineLabel("└   Global", "Makes the random offset global to the selected UV coordinates: all textures using the same UV coordinates will inherit the random offset animation and values defined for this texture.\nIt also means that they will be calculated in the vertex shader (faster but uses one interpolator).", highlighted);
 										GlobalRandomOffset = SGUILayout.Toggle(GlobalRandomOffset);
 										GlobalScrolling = GlobalRandomOffset;
 									}
 									EndHorizontal();
+								}
+								else if (SineAnimation)
+								{
+									// Sine properties if any
 								}
 							}
 						}
@@ -1494,7 +1990,7 @@ namespace ToonyColorsPro
 							BeginHorizontal();
 							{
 								bool highlighted = !IsDefaultImplementation ? MipProperty : MipProperty != GetDefaultImplementation<Imp_MaterialProperty_Texture>().MipProperty;
-								SGUILayout.InlineLabel("└─  Material Property", "Create a material property to control the mip level for sampling this texture in the vertex shader", highlighted);
+								SGUILayout.InlineLabel("└   Material Property", "Create a material property to control the mip level for sampling this texture in the vertex shader", highlighted);
 								MipProperty = SGUILayout.Toggle(MipProperty);
 							}
 							EndHorizontal();
@@ -1502,6 +1998,46 @@ namespace ToonyColorsPro
 
 						//SGUILayout.Indent -= 10;
 					} // if ( uvExpanded )
+
+					if (UvSource == UvSourceType.OtherShaderProperty)
+					{
+						BeginHorizontal();
+						{
+							bool highlighted = !IsDefaultImplementation ? false : LinkedShaderPropertyName != GetDefaultImplementation<Imp_MaterialProperty_Texture>().LinkedShaderPropertyName;
+							SGUILayout.InlineLabel("UV Shader Property", highlighted);
+
+							if (GUILayout.Button((LinkedShaderProperty != null) ? LinkedShaderProperty.Name : "None", SGUILayout.Styles.ShurikenPopup))
+							{
+								var menu = ShaderProperty.Imp_ShaderPropertyReference.CreateShaderPropertiesMenu(this.ParentShaderProperty, this.LinkedShaderProperty, OnSelectShaderProperty);
+								if (menu != null)
+								{
+									menu.ShowAsContext();
+								}
+							}
+						}
+						EndHorizontal();
+						GUILayout.Space(3);
+
+						// linked shader property errors
+						if (_linkedShaderProperty == null)
+						{
+							BeginHorizontal();
+							{
+								TCP2_GUI.HelpBoxLayout("No Shader Property defined.", MessageType.Error);
+							}
+							EndHorizontal();
+						}
+						else if (!_linkedShaderProperty.IsVisible())
+						{
+							BeginHorizontal();
+							{
+								TCP2_GUI.HelpBoxLayout("Invalid Shader Property defined.", MessageType.Error);
+							}
+							EndHorizontal();
+						}
+					}
+
+					// errors
 
 					if (UseTilingOffset && invalidTilingOffsetVariable)
 					{
@@ -1633,11 +2169,61 @@ namespace ToonyColorsPro
 				}
 			}
 
+			[Serialization.SerializeAs("imp_constant_float")]
+			public class Imp_ConstantFloat : Implementation
+			{
+				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
+				public static string MenuLabel { get { return "Constant Float"; } }
+				internal override string GUILabel() { return MenuLabel; }
+
+				[Serialization.SerializeAs("fprc")] FloatPrecision floatPrec;
+
+				[Serialization.SerializeAs("fv")] public float FloatValue = 1.0f;
+
+				public Imp_ConstantFloat(ShaderProperty shaderProperty) : base(shaderProperty)
+				{
+					floatPrec = FloatPrecision.@float;
+				}
+
+				internal override string PrintVariableFixedFunction()
+				{
+					return FloatValue.ToString();
+				}
+
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
+				{
+					return FloatValue.ToString("#.0###############", CultureInfo.InvariantCulture);
+				}
+
+				internal override void NewLineGUI(bool usedByCustomCode)
+				{
+					BeginHorizontal();
+					ShaderGenerator2.ContextualHelpBox("Uses a constant value in the shader.\nIf your shader property will keep the same value, this will be faster than using a Material Property.");
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? FloatValue != 1.0f : FloatValue != GetDefaultImplementation<Imp_ConstantFloat>().FloatValue;
+						SGUILayout.InlineLabel("Value", highlighted);
+						FloatValue = SGUILayout.FloatField(FloatValue);
+					}
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? floatPrec != default(FloatPrecision) : floatPrec != GetDefaultImplementation<Imp_ConstantFloat>().floatPrec;
+						SGUILayout.InlineLabel("Precision", highlighted);
+						floatPrec = (FloatPrecision)SGUILayout.EnumPopup(floatPrec);
+					}
+					EndHorizontal();
+				}
+			}
+
 			[Serialization.SerializeAs("imp_vcolors")]
 			public class Imp_VertexColor : Implementation
 			{
 				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
-				public static string MenuLabel { get { return "Vertex Color"; } }
+				public static string MenuLabel { get { return "Vertex/Color"; } }
 				internal override string GUILabel() { return MenuLabel; }
 				internal override OptionFeatures[] NeededFeatures() { return new[] { OptionFeatures.VertexColors }; }
 
@@ -1724,7 +2310,7 @@ namespace ToonyColorsPro
 			public class Imp_VertexTexcoord : Implementation
 			{
 				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
-				public static string MenuLabel { get { return "Vertex UV"; } }
+				public static string MenuLabel { get { return "Vertex/UV"; } }
 				internal override string GUILabel() { return MenuLabel; }
 
 				[Serialization.SerializeAs("tex")] public int TexcoordChannel = 0;
@@ -1770,11 +2356,28 @@ namespace ToonyColorsPro
 					InitChannelsCount();
 				}
 
+				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
+				{
+					string coord = ShaderGenerator2.VariablesManager.GetVariable("texcoord" + TexcoordChannel);
+					return string.Format("{0}.{1}.xy", inputSource, string.IsNullOrEmpty(coord) ? "texcoord" + TexcoordChannel : coord);
+				}
+
 				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
 				{
-					var hideChannels = TryGetArgument("hide_channels", arguments);
-					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
-					return string.Format("{0}.texcoord{1}{2}", inputSource, TexcoordChannel, channels);
+					string coord = ShaderGenerator2.VariablesManager.GetVariable("texcoord" + TexcoordChannel);
+					if (string.IsNullOrEmpty(coord))
+					{
+						Debug.LogError(ShaderGenerator2.ErrorMsg("Can't find UV coordinates for Shader Property: " + ParentShaderProperty.Name));
+						return null;
+					}
+					else
+					{
+						return string.Format("{0}.{1}.xy", inputSource, coord);
+					}
+
+					//var hideChannels = TryGetArgument("hide_channels", arguments);
+					//var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					//return string.Format("{0}.texcoord{1}{2}", inputSource, TexcoordChannel, channels);
 				}
 
 				internal override void NewLineGUI(bool usedByCustomCode)
@@ -1814,6 +2417,388 @@ namespace ToonyColorsPro
 								Channels = SGUILayout.XYZWSelector(Channels);
 							else
 								Channels = SGUILayout.XYZWSwizzle(Channels, ChannelsCount);
+						}
+					}
+					EndHorizontal();
+				}
+			}
+
+			[Serialization.SerializeAs("imp_localpos")]
+			public class Imp_LocalPosition : Implementation
+			{
+				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
+				public static string MenuLabel { get { return "Vertex/Local Position"; } }
+				internal override string GUILabel() { return MenuLabel; }
+				internal override OptionFeatures[] NeededFeatures()
+				{
+					return ParentShaderProperty.Program == ProgramType.Fragment ? new[] { OptionFeatures.Local_Pos_Fragment } : new OptionFeatures[0];
+				}
+
+				[Serialization.SerializeAs("cc")] public int ChannelsCount = 3;
+				[Serialization.SerializeAs("chan")] public string Channels = "XYZ";
+				string DefaultChannels = "XYZ";
+
+				public Imp_LocalPosition(ShaderProperty shaderProperty) : base(shaderProperty)
+				{
+					InitChannelsCount();
+					InitChannelsSwizzle();
+				}
+
+				void InitChannelsCount()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: ChannelsCount = 1; break;
+						case VariableType.float2: ChannelsCount = 2; break;
+						case VariableType.color:
+						case VariableType.float3: ChannelsCount = 3; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: ChannelsCount = 4; break;
+					}
+				}
+
+				void InitChannelsSwizzle()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: Channels = "X"; break;
+						case VariableType.float2: Channels = "XY"; break;
+						case VariableType.color:
+						case VariableType.float3: Channels = "XYZ"; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: Channels = "XYZW"; break;
+					}
+					DefaultChannels = Channels;
+				}
+
+				public override void OnPasted()
+				{
+					InitChannelsCount();
+				}
+
+				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}.vertex{1}", inputSource, channels);
+				}
+
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}.[[INPUT_VALUE:objPos]]{1}", inputSource, channels);
+				}
+
+				internal override void NewLineGUI(bool usedByCustomCode)
+				{
+					BeginHorizontal();
+					ShaderGenerator2.ContextualHelpBox("The object space position for the current vertex or fragment.");
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? Channels != DefaultChannels : Channels != GetDefaultImplementation<Imp_LocalPosition>().Channels;
+						SGUILayout.InlineLabel("Swizzle", highlighted);
+
+						if (usedByCustomCode)
+						{
+							using (new EditorGUI.DisabledScope(true))
+							{
+								GUILayout.Label(TCP2_GUI.TempContent("Defined in Custom Code"), SGUILayout.Styles.ShurikenValue, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+							}
+						}
+						else
+						{
+							if (ChannelsCount == 1)
+								Channels = SGUILayout.XYZSelector(Channels);
+							else
+								Channels = SGUILayout.XYZSwizzle(Channels, ChannelsCount);
+						}
+					}
+					EndHorizontal();
+				}
+			}
+
+			[Serialization.SerializeAs("imp_worldpos")]
+			public class Imp_WorldPosition : Implementation
+			{
+				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
+				public static string MenuLabel { get { return "Vertex/World Position"; } }
+				internal override string GUILabel() { return MenuLabel; }
+				internal override OptionFeatures[] NeededFeatures() { return new[] { ParentShaderProperty.Program == ProgramType.Vertex ? OptionFeatures.World_Pos_UV_Vertex : OptionFeatures.World_Pos_UV_Fragment }; }
+
+				[Serialization.SerializeAs("cc")] public int ChannelsCount = 3;
+				[Serialization.SerializeAs("chan")] public string Channels = "XYZ";
+				string DefaultChannels = "XYZ";
+
+				public Imp_WorldPosition(ShaderProperty shaderProperty) : base(shaderProperty)
+				{
+					InitChannelsCount();
+					InitChannelsSwizzle();
+				}
+
+				void InitChannelsCount()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: ChannelsCount = 1; break;
+						case VariableType.float2: ChannelsCount = 2; break;
+						case VariableType.color:
+						case VariableType.float3: ChannelsCount = 3; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: ChannelsCount = 4; break;
+					}
+				}
+
+				void InitChannelsSwizzle()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: Channels = "X"; break;
+						case VariableType.float2: Channels = "XY"; break;
+						case VariableType.color:
+						case VariableType.float3: Channels = "XYZ"; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: Channels = "XYZW"; break;
+					}
+					DefaultChannels = Channels;
+				}
+
+				public override void OnPasted()
+				{
+					InitChannelsCount();
+				}
+
+				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("worldPosUv{1}", inputSource, channels);
+				}
+
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}{1}", ShaderGenerator2.IsURP ? "positionWS" : inputSource + ".worldPos", channels);
+				}
+
+				internal override void NewLineGUI(bool usedByCustomCode)
+				{
+					BeginHorizontal();
+					ShaderGenerator2.ContextualHelpBox("The world space position for the current vertex or fragment.");
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? Channels != DefaultChannels : Channels != GetDefaultImplementation<Imp_WorldPosition>().Channels;
+						SGUILayout.InlineLabel("Swizzle", highlighted);
+
+						if (usedByCustomCode)
+						{
+							using (new EditorGUI.DisabledScope(true))
+							{
+								GUILayout.Label(TCP2_GUI.TempContent("Defined in Custom Code"), SGUILayout.Styles.ShurikenValue, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+							}
+						}
+						else
+						{
+							if (ChannelsCount == 1)
+								Channels = SGUILayout.XYZSelector(Channels);
+							else
+								Channels = SGUILayout.XYZSwizzle(Channels, ChannelsCount);
+						}
+					}
+					EndHorizontal();
+				}
+			}
+
+			[Serialization.SerializeAs("imp_localnorm")]
+			public class Imp_LocalNormal: Implementation
+			{
+				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
+				public static string MenuLabel { get { return "Vertex/Object Normal"; } }
+				internal override string GUILabel() { return MenuLabel; }
+				internal override OptionFeatures[] NeededFeatures()
+				{
+					return ParentShaderProperty.Program == ProgramType.Fragment ? new[] { OptionFeatures.Local_Normal_Fragment } : new OptionFeatures[0];
+				}
+
+				[Serialization.SerializeAs("cc")] public int ChannelsCount = 3;
+				[Serialization.SerializeAs("chan")] public string Channels = "XYZ";
+				string DefaultChannels = "XYZ";
+
+				public Imp_LocalNormal(ShaderProperty shaderProperty) : base(shaderProperty)
+				{
+					InitChannelsCount();
+					InitChannelsSwizzle();
+				}
+
+				void InitChannelsCount()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: ChannelsCount = 1; break;
+						case VariableType.float2: ChannelsCount = 2; break;
+						case VariableType.color:
+						case VariableType.float3: ChannelsCount = 3; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: ChannelsCount = 4; break;
+					}
+				}
+
+				void InitChannelsSwizzle()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: Channels = "X"; break;
+						case VariableType.float2: Channels = "XY"; break;
+						case VariableType.color:
+						case VariableType.float3: Channels = "XYZ"; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: Channels = "XYZW"; break;
+					}
+					DefaultChannels = Channels;
+				}
+
+				public override void OnPasted()
+				{
+					InitChannelsCount();
+				}
+
+				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}.normal{1}", inputSource, channels);
+				}
+
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}.[[INPUT_VALUE:objNormal]]{1}", inputSource, channels);
+				}
+
+				internal override void NewLineGUI(bool usedByCustomCode)
+				{
+					BeginHorizontal();
+					ShaderGenerator2.ContextualHelpBox("The object space position for the current vertex or fragment.");
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? Channels != DefaultChannels : Channels != GetDefaultImplementation<Imp_LocalNormal>().Channels;
+						SGUILayout.InlineLabel("Swizzle", highlighted);
+
+						if (usedByCustomCode)
+						{
+							using (new EditorGUI.DisabledScope(true))
+							{
+								GUILayout.Label(TCP2_GUI.TempContent("Defined in Custom Code"), SGUILayout.Styles.ShurikenValue, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+							}
+						}
+						else
+						{
+							if (ChannelsCount == 1)
+								Channels = SGUILayout.XYZSelector(Channels);
+							else
+								Channels = SGUILayout.XYZSwizzle(Channels, ChannelsCount);
+						}
+					}
+					EndHorizontal();
+				}
+			}
+
+			[Serialization.SerializeAs("imp_worldnorm")]
+			public class Imp_WorldNormal : Implementation
+			{
+				public static VariableType VariableCompatibility { get { return VariableTypeAll; } }
+				public static string MenuLabel { get { return "Vertex/World Normal"; } }
+				internal override string GUILabel() { return MenuLabel; }
+				internal override OptionFeatures[] NeededFeatures() { return new[] { ParentShaderProperty.Program == ProgramType.Vertex ? OptionFeatures.World_Normal_Vertex : OptionFeatures.World_Normal_Fragment }; }
+
+				[Serialization.SerializeAs("cc")] public int ChannelsCount = 3;
+				[Serialization.SerializeAs("chan")] public string Channels = "XYZ";
+				string DefaultChannels = "XYZ";
+
+				public Imp_WorldNormal(ShaderProperty shaderProperty) : base(shaderProperty)
+				{
+					InitChannelsCount();
+					InitChannelsSwizzle();
+				}
+
+				void InitChannelsCount()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: ChannelsCount = 1; break;
+						case VariableType.float2: ChannelsCount = 2; break;
+						case VariableType.color:
+						case VariableType.float3: ChannelsCount = 3; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: ChannelsCount = 4; break;
+					}
+				}
+
+				void InitChannelsSwizzle()
+				{
+					switch (ParentShaderProperty.Type)
+					{
+						case VariableType.@float: Channels = "X"; break;
+						case VariableType.float2: Channels = "XY"; break;
+						case VariableType.color:
+						case VariableType.float3: Channels = "XYZ"; break;
+						case VariableType.color_rgba:
+						case VariableType.float4: Channels = "XYZW"; break;
+					}
+					DefaultChannels = Channels;
+				}
+
+				public override void OnPasted()
+				{
+					InitChannelsCount();
+				}
+
+				internal override string PrintVariableVertex(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("worldNormalUv{0}", channels);
+				}
+
+				internal override string PrintVariableFragment(string inputSource, string outputSource, string arguments)
+				{
+					var hideChannels = TryGetArgument("hide_channels", arguments);
+					var channels = string.IsNullOrEmpty(hideChannels) ? "." + Channels.ToLowerInvariant() : "";
+					return string.Format("{0}.[[INPUT_VALUE:worldNormal]]{1}", inputSource, channels);
+				}
+
+				internal override void NewLineGUI(bool usedByCustomCode)
+				{
+					BeginHorizontal();
+					ShaderGenerator2.ContextualHelpBox("The world space normal for the current vertex or fragment.");
+					EndHorizontal();
+
+					BeginHorizontal();
+					{
+						bool highlighted = !IsDefaultImplementation ? Channels != DefaultChannels : Channels != GetDefaultImplementation<Imp_WorldNormal>().Channels;
+						SGUILayout.InlineLabel("Swizzle", highlighted);
+
+						if (usedByCustomCode)
+						{
+							using (new EditorGUI.DisabledScope(true))
+							{
+								GUILayout.Label(TCP2_GUI.TempContent("Defined in Custom Code"), SGUILayout.Styles.ShurikenValue, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+							}
+						}
+						else
+						{
+							if (ChannelsCount == 1)
+								Channels = SGUILayout.XYZSelector(Channels);
+							else
+								Channels = SGUILayout.XYZSwizzle(Channels, ChannelsCount);
 						}
 					}
 					EndHorizontal();
@@ -2277,8 +3262,18 @@ namespace ToonyColorsPro
 					{
 						defaultChannels += this.ChannelsOptions[i % this.ChannelsOptions.Length];
 					}
-					this.Channels = defaultChannels;
-					this.DefaultChannels = Channels;
+					this.DefaultChannels = defaultChannels;
+
+					// set Channels, or preserve existing ones as far as possible
+					var prevChannels = Channels;
+					Channels = "";
+					for (int i = 0; i < ChannelsCount; i++)
+					{
+						if (prevChannels != null && i < prevChannels.Length && this.ChannelsOptions.Contains(prevChannels[i].ToString()))
+							Channels += prevChannels[i];
+						else
+							Channels += this.ChannelsOptions[i % this.ChannelsOptions.Length];
+					}
 				}
 
 				/// <summary>
@@ -2364,9 +3359,13 @@ namespace ToonyColorsPro
 						else
 						{
 							if (ChannelsCount == 1)
+							{
 								Channels = SGUILayout.GenericSelector(ChannelsOptions, Channels);
+							}
 							else
+							{
 								Channels = SGUILayout.GenericSwizzle(Channels, ChannelsCount, ChannelsOptions);
+							}
 						}
 					}
 					EndHorizontal();
@@ -2670,10 +3669,7 @@ namespace ToonyColorsPro
 
 				void onProjectChanged()
 				{
-					if (prependType == PrependType.ExternalFile)
-					{
-						TryToFindPrependCodeBlock();
-					}
+					TryToFindPrependCodeBlock();
 					CheckReplacementTags();
 				}
 
@@ -3150,7 +4146,7 @@ namespace ToonyColorsPro
 					}
 				}
 
-				void TryToFindPrependCodeBlock()
+				public void TryToFindPrependCodeBlock()
 				{
 					if (prependType != PrependType.ExternalFile || string.IsNullOrEmpty(this.prependFileGuid))
 					{
@@ -3383,7 +4379,7 @@ namespace ToonyColorsPro
 					return prepandBlockLines.ToArray();
 				}
 
-				void CheckReplacementTags()
+				public void CheckReplacementTags()
 				{
 					if (usedImplementations != null)
 					{
@@ -3873,9 +4869,7 @@ namespace ToonyColorsPro
 				{
 					get
 					{
-						return base.HasErrors
-| _linkedShaderProperty == null
-| (_linkedShaderProperty != null && !_linkedShaderProperty.IsVisible());
+						return base.HasErrors | _linkedShaderProperty == null | (_linkedShaderProperty != null && !_linkedShaderProperty.IsVisible());
 					}
 				}
 
@@ -3952,7 +4946,7 @@ namespace ToonyColorsPro
 
 						if (GUILayout.Button((LinkedShaderProperty != null) ? LinkedShaderProperty.Name : "None", SGUILayout.Styles.ShurikenPopup))
 						{
-							var menu = CreateShaderPropertiesMenu();
+							var menu = CreateShaderPropertiesMenu(this.ParentShaderProperty, this.LinkedShaderProperty, OnSelectShaderProperty);
 							if (menu != null)
 							{
 								menu.ShowAsContext();
@@ -3967,39 +4961,34 @@ namespace ToonyColorsPro
 					{
 						int SourceChannelsCount = 0;
 						bool sourceIsColor = false;
-
-						BeginHorizontal();
+						switch (LinkedShaderProperty.Type)
 						{
-							switch (LinkedShaderProperty.Type)
-							{
-								case VariableType.@float:
-									SourceChannelsCount = 1;
-									break;
+							case VariableType.@float:
+								SourceChannelsCount = 1;
+								break;
 
-								case VariableType.float2:
-									SourceChannelsCount = 2;
-									break;
+							case VariableType.float2:
+								SourceChannelsCount = 2;
+								break;
 
-								case VariableType.color:
-									sourceIsColor = true;
-									SourceChannelsCount = 3;
-									break;
+							case VariableType.color:
+								sourceIsColor = true;
+								SourceChannelsCount = 3;
+								break;
 
-								case VariableType.float3:
-									SourceChannelsCount = 3;
-									break;
+							case VariableType.float3:
+								SourceChannelsCount = 3;
+								break;
 
-								case VariableType.float4:
-									SourceChannelsCount = 4;
-									break;
+							case VariableType.float4:
+								SourceChannelsCount = 4;
+								break;
 
-								case VariableType.color_rgba:
-									sourceIsColor = true;
-									SourceChannelsCount = 4;
-									break;
-							}
+							case VariableType.color_rgba:
+								sourceIsColor = true;
+								SourceChannelsCount = 4;
+								break;
 						}
-						EndHorizontal();
 
 						BeginHorizontal();
 						{
@@ -4046,7 +5035,7 @@ namespace ToonyColorsPro
 					}
 				}
 
-				GenericMenu CreateShaderPropertiesMenu()
+				public static GenericMenu CreateShaderPropertiesMenu(ShaderProperty parent, ShaderProperty selected, GenericMenu.MenuFunction2 selectCallback)
 				{
 					var menu = new GenericMenu();
 					var shaderProperties = new List<ShaderProperty>(ShaderGenerator2.CurrentConfig.VisibleShaderProperties);
@@ -4055,17 +5044,17 @@ namespace ToonyColorsPro
 					{
 						foreach (var sp in shaderProperties)
 						{
-							if (sp == ParentShaderProperty)
+							if (sp == parent)
 								continue;
 
-							string referenceError = IsReferencePossible(ParentShaderProperty, sp);
+							string referenceError = IsReferencePossible(parent, sp);
 
 							if (referenceError != "")
 							{
 								if (referenceError != null)
 									menu.AddDisabledItem(new GUIContent(sp.Name + " " + referenceError));
 								else
-									menu.AddItem(new GUIContent(sp.Name), LinkedShaderProperty == sp, OnSelectShaderProperty, sp);
+									menu.AddItem(new GUIContent(sp.Name), selected == sp, selectCallback, sp);
 							}
 						}
 						return menu;
@@ -4090,6 +5079,22 @@ namespace ToonyColorsPro
 							else
 							{
 								foreach (var dependency in impSpRef.Dependencies)
+								{
+									cyclic |= CheckCyclicReferences(parent, dependency);
+								}
+							}
+						}
+
+						var impMpTex = imp as Imp_MaterialProperty_Texture;
+						if (impMpTex != null && impMpTex.UvSource == Imp_MaterialProperty_Texture.UvSourceType.OtherShaderProperty)
+						{
+							if (impMpTex.Dependencies.Contains(parent))
+							{
+								return true;
+							}
+							else
+							{
+								foreach (var dependency in impMpTex.Dependencies)
 								{
 									cyclic |= CheckCyclicReferences(parent, dependency);
 								}
@@ -4189,7 +5194,7 @@ namespace ToonyColorsPro
 					Channels = "";
 					for (int i = 0; i < ChannelsCount; i++)
 					{
-						if (i < prevChannels.Length && options.Contains(prevChannels[i].ToString()))
+						if (prevChannels != null && i < prevChannels.Length && options.Contains(prevChannels[i].ToString()))
 							Channels += prevChannels[i];
 						else
 							Channels += options[i % options.Length];
@@ -4253,17 +5258,20 @@ namespace ToonyColorsPro
 
 						if (this.ParentShaderProperty.Program == ProgramType.Vertex
 							&& imp_texture != null
-							&& imp_texture.UseScreenSpaceUV)
+							&& imp_texture.UvSource == Imp_MaterialProperty_Texture.UvSourceType.ScreenSpace)
 						{
+							// TODO is that stills true?
 							errorMessage = "You can't use a texture with screen-space UV on a vertex Shader Property.";
 						}
 
+						/*
 						if (this.ParentShaderProperty.Program == ProgramType.Vertex
 							&& imp_texture != null
 							&& imp_texture.UseWorldPosUV)
 						{
 							errorMessage = "You can't use a texture with world position UV on a vertex Shader Property.";
 						}
+						*/
 					}
 				}
 

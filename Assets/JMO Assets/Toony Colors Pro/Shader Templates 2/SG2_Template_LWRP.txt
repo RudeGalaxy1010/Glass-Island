@@ -393,7 +393,7 @@ Shader "@%SHADER_NAME%@"
 		[[MODULE:PROPERTIES_BLOCK:Subsurface Scattering]]
 		[[MODULE:PROPERTIES_BLOCK:MatCap]]
 	#if_not_empty
-		[Header(Ambient Lighting)]
+		[TCP2HeaderHelp(Ambient Lighting)]
 	#start_not_empty_block
 /// IF AMBIENT_SHADER_FEATURE
 		[Toggle(TCP2_AMBIENT)] _UseAmbient ("Enable Ambient/Indirect Diffuse", Float) = 0
@@ -1320,7 +1320,7 @@ Shader "@%SHADER_NAME%@"
 				half4 albedoAlpha = half4(albedo, alpha);
 	/// IF TRIPLANAR
 				[[MODULE:FRAGMENT:Triplanar:INPUT(positionWS, normalWS, input.[[INPUT_VALUE:objPos]], input.[[INPUT_VALUE:objNormal]])]]
-				[[MODULE:FRAGMENT:Triplanar(albedoAlpha, positionWS)]]
+				[[MODULE:FRAGMENT:Triplanar(albedoAlpha, positionWS, input.[[INPUT_VALUE:objPos])]]
 	///
 	/// IF TEXTURE_BLENDING
 				[[MODULE:FRAGMENT:Texture Blending(albedoAlpha)]]
@@ -1411,7 +1411,7 @@ Shader "@%SHADER_NAME%@"
 
 				[[MODULE:FRAGMENT:Specular(color, normalWS, tangentWS, lightDir, viewDirWS, ndl, ndvRaw, atten)]]
 				[[MODULE:FRAGMENT:Subsurface Scattering:LWRP_MAIN_LIGHT(color, normalWS, viewDirWS, albedo, lightColor, lightDir, atten)]]
-				[[MODULE:FRAGMENT:Reflection(color, normalWS, viewDirWS)]]
+				[[MODULE:FRAGMENT:Reflection(color, normalWS, viewDirWS, ndvRaw)]]
 
 				// Additional lights loop
 			#ifdef _ADDITIONAL_LIGHTS

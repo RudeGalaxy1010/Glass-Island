@@ -39,7 +39,7 @@ keyword_str		lbl="Include File"			kw=VERTEXMOTION_INCLUDE		indent		needs=VERTEXM
 
 //================================================================
 
-#VARIABLES
+#FUNCTIONS
 /// IF VERTEXMOTION
 	/// IF LWRP
 		#define VERTEXMOTION_ASE_HD_LW_RP
@@ -71,14 +71,14 @@ keyword_str		lbl="Include File"			kw=VERTEXMOTION_INCLUDE		indent		needs=VERTEXM
 /// IF VERTEXMOTION
 		//VertExmotion
 		float4 vxData = [[VALUE:VertExmotion Data]];
-		float4 worldPos = mul(unity_ObjectToWorld, vertex);
+		float4 vertExmotionPos = mul(unity_ObjectToWorld, vertex);
 		float w = 0;
 	/// IF VERTEXMOTION_SIMPLE
-		worldPos = VertExmotionBase(worldPos, vxData, w);
+		vertExmotionPos.xyz = VertExmotionBase(vertExmotionPos.xyz, vxData, w);
 	/// ELIF VERTEXMOTION_NORMAL
-		worldPos = VertExmotionWorldPosASE(worldPos, vxData, normal, tangent);
+		vertExmotionPos.xyz = VertExmotionWorldPosASE(vertExmotionPos.xyz, vxData, normal, tangent);
 	///
-		vertex.xyz = mul(unity_WorldToObject, worldPos).xyz;
+		vertex.xyz = mul(unity_WorldToObject, vertExmotionPos).xyz;
 ///
 #END
 

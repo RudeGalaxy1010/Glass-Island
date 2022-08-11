@@ -19,7 +19,7 @@ using ToonyColorsPro.Legacy;
 public class TCP2_MaterialInspector : ShaderGUI
 {
 	//Constants
-	private const string BASE_SHADER_PATH = "Toony Colors Pro 2/";
+	private const string BASE_SHADER_PATH = "Toony Colors Pro 2/Legacy/";
 	private const string VARIANT_SHADER_PATH = "Hidden/Toony Colors Pro 2/Variants/";
 	private const string BASE_SHADER_NAME = "Desktop";
 	private const string BASE_SHADER_NAME_MOB = "Mobile";

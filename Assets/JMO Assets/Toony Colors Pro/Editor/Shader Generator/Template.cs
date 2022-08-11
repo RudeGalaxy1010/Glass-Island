@@ -7,6 +7,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using ToonyColorsPro.Utilities;
+using ToonyColorsPro.ShaderGenerator.CodeInjection;
 
 // Represents a shader Template for the Shader Generator
 
@@ -29,6 +30,13 @@ namespace ToonyColorsPro
 			internal string id;
 			internal UIFeature[] uiFeatures;
 			internal ShaderProperty[] shaderProperties;
+			internal List<InjectionPoint> injectionPoints;
+
+			internal class InjectionPoint
+			{
+				public string name;
+				public ShaderProperty.ProgramType program = ShaderProperty.ProgramType.Undefined;
+			}
 
 			internal Template()
 			{
@@ -176,7 +184,7 @@ namespace ToonyColorsPro
 			//Returns an array of parsed lines based on the current features enabled, with their corresponding original line number (for error reporting)
 			//Only keeps the lines necessary to generate the shader source, e.g. #FEATURES will be skipped
 			//Conditions are now only processed in this function, all the other code should ignore them
-			internal ParsedLine[] GetParsedLinesFromConditions(Config config, List<string> flags)
+			internal ParsedLine[] GetParsedLinesFromConditions(Config config, List<string> flags, Dictionary<string, List<string>> extraFlags)
 			{
 				var list = new List<ParsedLine>();
 
@@ -196,13 +204,14 @@ namespace ToonyColorsPro
 
 				//make sure keywords have been processed
 				var keywordsFeatures = new List<string>();
-				ProcessKeywordsBlock(config, conditionFeatures, keywordsFeatures, flags);
+				ProcessKeywordsBlock(config, conditionFeatures, keywordsFeatures, flags, extraFlags);
 				features.AddRange(keywordsFeatures);
 
 				//before first #PASS tag: use needed features from _all_ passes:
 				//this is to make sure that the CGINCLUDE block with needed #VARIABLES:MODULES gets processed correctly
 				features.AddRange(config.GetShaderPropertiesNeededFeaturesAll());
 				features.AddRange(config.GetHooksNeededFeatures());
+				features.AddRange(config.GetCodeInjectionNeeededFeatures());
 
 				//parse lines and strip based on conditions
 				for (var i = 0; i < textLines.Length; i++)
@@ -217,10 +226,11 @@ namespace ToonyColorsPro
 							passIndex++;
 							features = new List<string>(config.Features);
 							features.AddRange(config.GetHooksNeededFeatures());
+							features.AddRange(config.GetCodeInjectionNeeededFeatures());
 							features.AddRange(config.GetShaderPropertiesNeededFeaturesForPass(passIndex));
 
 							var passKeywordsFeatures = new List<string>();
-							ProcessKeywordsBlock(config, features, passKeywordsFeatures, flags);
+							ProcessKeywordsBlock(config, features, passKeywordsFeatures, flags, extraFlags);
 							features.AddRange(passKeywordsFeatures);
 						}
 
@@ -240,10 +250,22 @@ namespace ToonyColorsPro
 					//Conditions
 					if (line.Contains("///"))
 					{
-						var error = ExpressionParser.ProcessCondition(line, features, ref depth, ref stack, ref done);
-						if (!string.IsNullOrEmpty(error))
+						if (line.Contains("/// IF_KEYWORD "))
 						{
-							Debug.LogError(ShaderGenerator2.ErrorMsg(error + "\n@ line " + i));
+							string keyword = line.Substring(line.IndexOf("/// IF_KEYWORD ") + "/// IF_KEYWORD ".Length);
+							bool condition = config.HasKeyword(keyword) && !string.IsNullOrEmpty(config.GetKeyword(keyword));
+							Debug.Log("Check keyword '" + keyword + "' = " + condition);
+							stack.Add(condition);
+							done.Add(condition);
+							depth++;
+						}
+						else
+						{
+							var error = ExpressionParser.ProcessCondition(line, features, ref depth, ref stack, ref done);
+							if (!string.IsNullOrEmpty(error))
+							{
+								Debug.LogError(ShaderGenerator2.ErrorMsg(error + "\n@ line " + i));
+							}
 						}
 					}
 					//Regular line
@@ -344,6 +366,7 @@ namespace ToonyColorsPro
 				templateType = null;
 				templateKeywords = null;
 				id = null;
+				injectionPoints = new List<InjectionPoint>();
 
 				UIFeature.ClearFoldoutStack();
 
@@ -353,6 +376,7 @@ namespace ToonyColorsPro
 					var newTemplateLines = new List<string>();
 					Dictionary<string, Module> modules = new Dictionary<string, Module>();
 					var usedModulesVariables = new HashSet<Module>();
+					var usedModulesFunctions = new HashSet<Module>();
 					var usedModulesInput = new HashSet<Module>();
 					for (int i = 0; i < originalTextLines.Length; i++)
 					{
@@ -455,7 +479,30 @@ namespace ToonyColorsPro
 									}
 								}
 							}
-							else if(tag.StartsWith("VARIABLES:"))
+							else if (tag.StartsWith("FUNCTIONS:"))
+							{
+								//Print Functions line from specific module
+								foreach (var module in modules.Values)
+								{
+									if (module.name == moduleName)
+									{
+										AddRangeWithIndent(newTemplateLines, module.Functions, indent);
+										usedModulesFunctions.Add(module);
+									}
+								}
+							}
+							else if (tag == "FUNCTIONS")
+							{
+								//Print all Variables lines from all modules
+								foreach (var module in modules.Values)
+								{
+									if (!usedModulesFunctions.Contains(module))
+									{
+										AddRangeWithIndent(newTemplateLines, module.Functions, indent);
+									}
+								}
+							}
+							else if (tag.StartsWith("VARIABLES:"))
 							{
 								//Print Variables line from specific module
 								foreach (var module in modules.Values)
@@ -536,7 +583,9 @@ namespace ToonyColorsPro
 							}
 						}
 						else
+						{
 							newTemplateLines.Add(line);
+						}
 					}
 
 					//Apply to textLines
@@ -655,6 +704,28 @@ namespace ToonyColorsPro
 								else
 								{
 									Debug.LogError(ShaderGenerator2.ErrorMsg(string.Format("Can't find referenced Shader Property in template.\n'{0}' tried to reference '{1}'", shaderProperty.Name, impSpRef.LinkedShaderPropertyName)));
+								}
+							}
+
+							var impMpTex = imp as ShaderProperty.Imp_MaterialProperty_Texture;
+							if (impMpTex != null && impMpTex.UvSource == ShaderProperty.Imp_MaterialProperty_Texture.UvSourceType.OtherShaderProperty && !string.IsNullOrEmpty(impMpTex.LinkedShaderPropertyName))
+							{
+								// NOTE: same code as above, with variables changes for materialproperty_tex
+								var match = shaderPropertiesList.Find(sp => sp.Name == impMpTex.LinkedShaderPropertyName);
+								if (match != null)
+								{
+									var channels = impMpTex.UVChannels;
+									impMpTex.LinkedShaderProperty = match;
+									//restore channels from template data, it's up to the template to match the referenced shader property
+									if (!string.IsNullOrEmpty(channels))
+									{
+										impMpTex.UVChannels = channels.ToUpperInvariant();
+									}
+									impMpTex.ForceUpdateParentDefaultHash();
+								}
+								else
+								{
+									Debug.LogError(ShaderGenerator2.ErrorMsg(string.Format("Can't find referenced Shader Property in template.\n'{0}' tried to reference '{1}'", shaderProperty.Name, impMpTex.LinkedShaderPropertyName)));
 								}
 							}
 						}
@@ -776,54 +847,57 @@ namespace ToonyColorsPro
 				{
 					var line = parsedLines[i].line.Trim();
 
-					if (line.StartsWith("#PASS"))
+					if (line.Length > 0 && line[0] == '#')
 					{
-						passIndex++;
-						shaderPropertiesPerPass.Add(new List<ShaderProperty>());
-						continue;
-					}
-
-					if (line.StartsWith("#VERTEX"))
-					{
-						program = "vertex";
-						continue;
-					}
-
-					if (line.StartsWith("#FRAGMENT"))
-					{
-						program = "fragment";
-						continue;
-					}
-
-					if (line.StartsWith("#LIGHTING"))
-					{
-						program = "lighting";
-						continue;
-					}
-
-					if (passIndex < 0)
-					{
-						continue;
-					}
-
-					// enabled generic implementation
-					if (line.StartsWith("#ENABLE_IMPL"))
-					{
-						ShaderProperty.Imp_GenericFromTemplate.EnableFromLine(line, passIndex, program);
-						continue;
-					}
-					// disabled generic implementation
-					if (line.StartsWith("#DISABLE_IMPL"))
-					{
-						if (line.Contains("DISABLE_IMPL_ALL"))
+						if (line.StartsWith("#PASS"))
 						{
-							ShaderProperty.Imp_GenericFromTemplate.DisableAll();
+							passIndex++;
+							shaderPropertiesPerPass.Add(new List<ShaderProperty>());
+							continue;
 						}
-						else
+
+						if (line.StartsWith("#VERTEX"))
 						{
-							ShaderProperty.Imp_GenericFromTemplate.DisableFromLine(line, passIndex, program);
+							program = "vertex";
+							continue;
 						}
-						continue;
+
+						if (line.StartsWith("#FRAGMENT"))
+						{
+							program = "fragment";
+							continue;
+						}
+
+						if (line.StartsWith("#LIGHTING"))
+						{
+							program = "lighting";
+							continue;
+						}
+
+						if (passIndex < 0)
+						{
+							continue;
+						}
+
+						// enabled generic implementation
+						if (line.StartsWith("#ENABLE_IMPL"))
+						{
+							ShaderProperty.Imp_GenericFromTemplate.EnableFromLine(line, passIndex, program);
+							continue;
+						}
+						// disabled generic implementation
+						if (line.StartsWith("#DISABLE_IMPL"))
+						{
+							if (line.Contains("DISABLE_IMPL_ALL"))
+							{
+								ShaderProperty.Imp_GenericFromTemplate.DisableAll();
+							}
+							else
+							{
+								ShaderProperty.Imp_GenericFromTemplate.DisableFromLine(line, passIndex, program);
+							}
+							continue;
+						}
 					}
 
 					var end = 0;
@@ -857,6 +931,21 @@ namespace ToonyColorsPro
 								Debug.LogError(ShaderGenerator2.ErrorMsg(string.Format("No match for used Shader Property in code: '<b>{0}</b>'", tag)));
 							}
 						}
+
+						if (tag.StartsWith("INJECTION_POINT:"))
+						{
+							string injectionPoint = tag.Substring(tag.IndexOf(":") + 1);
+
+							var list = CodeInjectionManager.instance.GetShaderPropertiesForInjectionPoint(injectionPoint);
+
+							foreach (var sp in list)
+							{
+								if (!shaderPropertiesPerPass[passIndex].Contains(sp))
+								{
+									shaderPropertiesPerPass[passIndex].Add(sp);
+								}
+							}
+						}
 					}
 				}
 
@@ -880,6 +969,22 @@ namespace ToonyColorsPro
 								findAndAddLinkedShaderProperties(impSpRef.LinkedShaderProperty, list);
 							}
 						}
+						var impMpTex = imp as ShaderProperty.Imp_MaterialProperty_Texture;
+						if (impMpTex != null && impMpTex.UvSource == ShaderProperty.Imp_MaterialProperty_Texture.UvSourceType.OtherShaderProperty)
+						{
+							if (impMpTex.LinkedShaderProperty == null)
+							{
+								continue;
+							}
+
+							if (!list.Contains(impMpTex.LinkedShaderProperty))
+							{
+								list.Add(impMpTex.LinkedShaderProperty);
+
+								// recursive
+								findAndAddLinkedShaderProperties(impMpTex.LinkedShaderProperty, list);
+							}
+						}
 					}
 				};
 				for (int i = 0; i < shaderPropertiesPerPass.Count; i++)
@@ -892,6 +997,49 @@ namespace ToonyColorsPro
 				}
 
 				return shaderPropertiesPerPass;
+			}
+
+			internal void UpdateInjectionPoints(ParsedLine[] parsedLines)
+			{
+				injectionPoints = new List<InjectionPoint>();
+
+				if (textAsset != null && !string.IsNullOrEmpty(textAsset.text))
+				{
+					var currentProgram = ShaderProperty.ProgramType.Undefined;
+					for (int i = 0; i < parsedLines.Length; i++)
+					{
+						string line = parsedLines[i].line;
+
+						if (line.Length > 0 && line[0] == '#')
+						{
+							// Get current program type
+							if (line.StartsWith("#PASS"))
+							{
+								currentProgram = ShaderProperty.ProgramType.Undefined;
+							}
+							else if (line.StartsWith("#VERTEX"))
+							{
+								currentProgram = ShaderProperty.ProgramType.Vertex;
+							}
+							else if (line.StartsWith("#FRAGMENT") || line.StartsWith("#LIGHTING"))
+							{
+								currentProgram = ShaderProperty.ProgramType.Fragment;
+							}
+						}
+						else if (line.Contains("INJECTION_POINT:"))
+						{
+							int start = line.IndexOf("INJECTION_POINT:") + "INJECTION_POINT:".Length;
+							int end = line.LastIndexOf("]]");
+							string injectionName = line.Substring(start, end - start);
+
+							injectionPoints.Add(new InjectionPoint()
+							{
+								name = injectionName,
+								program = currentProgram
+							});
+						}
+					}
+				}
 			}
 
 			ShaderProperty GetShaderPropertyByName(string name)
@@ -908,7 +1056,7 @@ namespace ToonyColorsPro
 			}
 
 			//Process the #KEYWORDS block for this config
-			internal void ProcessKeywordsBlock(Config config, List<string> conditionalFeatures, List<string> tempFeatures, List<string> tempFlags)
+			internal void ProcessKeywordsBlock(Config config, List<string> conditionalFeatures, List<string> tempFeatures, List<string> tempFlags, Dictionary<string, List<string>> tempExtraFlags)
 			{
 				var depth = -1;
 				var stack = new List<bool>();
@@ -940,9 +1088,22 @@ namespace ToonyColorsPro
 							//Conditions
 							if (line.Contains("///"))
 							{
-								var error = ExpressionParser.ProcessCondition(line, conditionalFeatures, ref depth, ref stack, ref done);
-								if (!string.IsNullOrEmpty(error))
-									Debug.LogError(ShaderGenerator2.ErrorMsg(error));
+								if (line.Contains("/// IF_KEYWORD "))
+								{
+									string keyword = line.Substring(line.IndexOf("/// IF_KEYWORD ") + "/// IF_KEYWORD ".Length);
+									bool condition = config.HasKeyword(keyword) && !string.IsNullOrEmpty(config.GetKeyword(keyword));
+									stack.Add(condition);
+									done.Add(condition);
+									depth++;
+								}
+								else
+								{
+									var error = ExpressionParser.ProcessCondition(line, conditionalFeatures, ref depth, ref stack, ref done);
+									if (!string.IsNullOrEmpty(error))
+									{
+										Debug.LogError(ShaderGenerator2.ErrorMsg(error));
+									}
+								}
 							}
 							//Regular line
 							else
@@ -950,7 +1111,7 @@ namespace ToonyColorsPro
 								//Process line if inside valid condition block
 								if ((depth >= 0 && stack[depth]) || depth < 0)
 								{
-									if (config.ProcessKeywords(line, tempFeatures, tempFlags))
+									if (config.ProcessKeywords(line, tempFeatures, tempFlags, tempExtraFlags))
 									{
 										// add the new toggled features, if any
 										foreach (var f in tempFeatures)

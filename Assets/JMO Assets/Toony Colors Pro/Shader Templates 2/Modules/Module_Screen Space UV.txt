@@ -30,7 +30,7 @@
 
 //================================================================
 
-#VARIABLES
+#FUNCTIONS
 /// IF USE_SCREEN_SPACE_UV_FRAGMENT && SCREEN_SPACE_UV_OBJECT_OFFSET
 
 	//Get screen space UV with object offset taken into account

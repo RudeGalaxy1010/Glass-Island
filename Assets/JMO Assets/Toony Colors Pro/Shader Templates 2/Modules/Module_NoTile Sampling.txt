@@ -6,19 +6,6 @@
 // (c) 2017 Inigo Quilez, MIT License
 // http://www.iquilezles.org/www/articles/texturerepetition/texturerepetition.htm
 
-#FEATURES
-#END
-
-//================================================================
-
-#PROPERTIES_NEW
-#END
-
-//================================================================
-
-#KEYWORDS
-#END
-
 //================================================================
 
 #PROPERTIES_BLOCK
@@ -29,13 +16,11 @@
 
 //================================================================
 
-#VARIABLES
+#FUNCTIONS
 /// IF NOTILE_SAMPLING
 
-	// Non-repeating Tiling texture fetch function
+	// Non-repeating tiling texture fetch function
 	// Adapted from: http://www.iquilezles.org/www/articles/texturerepetition/texturerepetition.htm (c) 2017 - Inigo Quilez - MIT License
-	sampler2D _NoTileNoiseTex;
-	float4 _NoTileNoiseTex_TexelSize;
 	float4 tex2D_noTile(sampler2D samp, in float2 uv)
 	{
 		// sample variation pattern
@@ -67,15 +52,13 @@
 
 //================================================================
 
-#INPUT
+#VARIABLES
+/// IF NOTILE_SAMPLING
+	// Non-repeating tiling
+	sampler2D _NoTileNoiseTex;
+	float4 _NoTileNoiseTex_TexelSize;
+
+///
 #END
 
 //================================================================
-
-#VERTEX
-#END
-
-//================================================================
-
-#FRAGMENT
-#END

@@ -185,6 +185,10 @@ namespace ToonyColorsPro
 			{
 				VertexColors,
 				NoTile_Sampling,
+				Triplanar_Sampling,
+				Triplanar_Sampling_Vertex,
+				Triplanar_Sampling_Global,
+				Triplanar_Sampling_Local,
 				HSV_Full,
 				HSV_Grayscale,
 				HSV_Colorize,
@@ -192,8 +196,15 @@ namespace ToonyColorsPro
 				Screen_Space_UV_Fragment,
 				Screen_Space_UV_Object_Offset,
 				UV_Anim_Random_Offset,
+				UV_Anim_Sine,
+				UV_Anim_Sine_World,
 				Scale_By_Texel_Size,
-				World_Pos_UV
+				World_Pos_UV_Fragment,
+				World_Pos_UV_Vertex,
+				Local_Pos_Fragment,
+				Local_Normal_Fragment,
+				World_Normal_Vertex,
+				World_Normal_Fragment
 			}
 
 			[Flags]
@@ -332,7 +343,11 @@ namespace ToonyColorsPro
 			public List<int> implementationsExpandedStates = new List<int>();
 			string helpMessage;
 			string displayName = null;
-			public string DisplayName { get { return displayName ?? _name; } }
+			public string DisplayName
+			{
+				get { return displayName ?? _name; }
+				set { displayName = value; }
+			}
 
 			public delegate void OnImplementationsChanged();
 			public OnImplementationsChanged onImplementationsChanged;
@@ -341,7 +356,7 @@ namespace ToonyColorsPro
 			public bool manuallyModified { get; private set; }
 			public bool error { get; private set; }
 			// indicates whether this property should be sampled when using its value, or at the beginning of the vert/frag functions
-			public bool deferredSampling { get; private set; }
+			public bool deferredSampling { get; set; }
 			public bool cantReferenceOtherProperties { get; private set; }
 			public string preventReference { get; private set; }
 
@@ -482,6 +497,8 @@ namespace ToonyColorsPro
 			/// </summary>
 			public bool IsVisible()
 			{
+				if (ShaderGenerator2.CurrentConfig == null) return false;
+
 				return Array.Exists(ShaderGenerator2.CurrentConfig.VisibleShaderProperties, sp => sp == this);
 			}
 
@@ -508,18 +525,30 @@ namespace ToonyColorsPro
 				var result = "";
 				foreach (var i in implementations)
 				{
-					if ((gpuInstanced && i.IsGpuInstanced) || (!gpuInstanced && !i.IsGpuInstanced))
+					var str = i.PrintVariableDeclare(indent, gpuInstanced);
+					if (!string.IsNullOrEmpty(str))
 					{
-						var str = i.PrintVariableDeclare(indent);
-						if (!string.IsNullOrEmpty(str))
-						{
-							result += indent + str + "\n";
-						}
+						result += indent + str + "\n";
 					}
 				}
 				if (string.IsNullOrEmpty(result.Trim()))
 					return "";
 				return result.TrimEnd('\n').TrimStart();
+			}
+
+			//Print the variables/properties declaration that are incompatible with CBuffer/GPU instancing buffer
+			public string PrintVariableDeclareOutsideCBuffer(string indent)
+			{
+				string result = "";
+				foreach (var imp in implementations)
+				{
+					string prop = imp.PrintVariableDeclareOutsideCBuffer(indent);
+					if (prop != null)
+					{
+						result += prop;
+					}
+				}
+				return result.TrimEnd('\n');
 			}
 
 			//Print variables in SurfaceOutput so that they can be used in the Lighting function (and possibly cross-referenced in the Surface function)
@@ -673,14 +702,45 @@ namespace ToonyColorsPro
 				{
 					case OptionFeatures.VertexColors:
 					{
-						var features = new List<string>();
 						if (program == ProgramType.Fragment)
-							features.Add("USE_VERTEX_COLORS_FRAG");
-						features.Add("USE_VERTEX_COLORS_VERT");
-						return features.ToArray();
+						{
+							return new[] { "USE_VERTEX_COLORS_FRAG", "USE_VERTEX_COLORS_VERT" };
+						}
+						else
+						{
+							return new[] { "USE_VERTEX_COLORS_VERT" };
+						}
+					}
+
+					case OptionFeatures.UV_Anim_Sine:
+					{
+						if (program == ProgramType.Fragment)
+						{
+							return new[] { "UV_SINE_ANIMATION_VERTEX", "UV_SINE_ANIMATION_FRAGMENT" };
+						}
+						else
+						{
+							return new[] { "UV_SINE_ANIMATION_VERTEX" };
+						}
+					}
+
+					case OptionFeatures.UV_Anim_Sine_World:
+					{
+						if (program == ProgramType.Fragment)
+						{
+							return new[] { "UV_SINE_ANIMATION_VERTEX_WORLD", "UV_SINE_ANIMATION_FRAGMENT_WORLD", "USE_WORLD_POSITION_UV_VERTEX" };
+						}
+						else
+						{
+							return new[] { "UV_SINE_ANIMATION_VERTEX_WORLD", "USE_WORLD_POSITION_UV_VERTEX" };
+						}
 					}
 
 					case OptionFeatures.NoTile_Sampling: return new[] { "NOTILE_SAMPLING" };
+					case OptionFeatures.Triplanar_Sampling: return new[] { "TRIPLANAR_SAMPLING" };
+					case OptionFeatures.Triplanar_Sampling_Global: return new[] { "TRIPLANAR_SAMPLING_GLOBAL" };
+					case OptionFeatures.Triplanar_Sampling_Local: return new[] { "TRIPLANAR_SAMPLING_LOCAL" };
+					case OptionFeatures.Triplanar_Sampling_Vertex: return new[] { "TRIPLANAR_SAMPLING_VERTEX" };
 					case OptionFeatures.HSV_Full: return new[] { "USE_HSV_FULL" };
 					case OptionFeatures.HSV_Grayscale: return new[] { "USE_HSV_GRAYSCALE" };
 					case OptionFeatures.HSV_Colorize: return new[] { "USE_HSV_COLORIZE" };
@@ -688,7 +748,12 @@ namespace ToonyColorsPro
 					case OptionFeatures.Screen_Space_UV_Fragment: return new[] { "USE_SCREEN_SPACE_UV_FRAGMENT" };
 					case OptionFeatures.Screen_Space_UV_Object_Offset: return new[] { "SCREEN_SPACE_UV_OBJECT_OFFSET" };
 					case OptionFeatures.UV_Anim_Random_Offset: return new[] { "HASH_22" };
-					case OptionFeatures.World_Pos_UV: return new[] { "USE_WORLD_POSITION_FRAGMENT" };
+					case OptionFeatures.World_Pos_UV_Fragment: return new[] { "USE_WORLD_POSITION_FRAGMENT" };
+					case OptionFeatures.World_Pos_UV_Vertex: return new[] { "USE_WORLD_POSITION_UV_VERTEX" };
+					case OptionFeatures.Local_Pos_Fragment: return new[] { "USE_OBJECT_POSITION_FRAGMENT" };
+					case OptionFeatures.Local_Normal_Fragment: return new[] { "USE_OBJECT_NORMAL_FRAGMENT" };
+					case OptionFeatures.World_Normal_Vertex: return new[] { "USE_WORLD_NORMAL_UV_VERTEX" };
+					case OptionFeatures.World_Normal_Fragment: return new[] { "USE_WORLD_NORMAL_FRAGMENT" };
 				}
 
 				return new string[0];
@@ -711,7 +776,7 @@ namespace ToonyColorsPro
 				};
 			}
 
-			string GetVariableName()
+			internal string GetVariableName()
 			{
 				if (VariableTypeIsFixedFunction(Type))
 				{
@@ -1069,6 +1134,7 @@ namespace ToonyColorsPro
 			static readonly GUIContent gc_ExportImplementations = new GUIContent("Export Implementations...");
 			static readonly GUIContent gc_ImportImplementations = new GUIContent("Import Implementations...");
 			static readonly GUIContent gc_ResetImplementations = new GUIContent("Reset Default Implementation");
+			static readonly GUIContent gc_debugCompareImplementations = new GUIContent("Debug: compare implementations with defaults");
 			static List<Implementation> s_copiedImplementationsBuffer;
 			static ShaderProperty.VariableType s_copiedImplementationsType;
 
@@ -1131,6 +1197,20 @@ namespace ToonyColorsPro
 
 				menu.AddSeparator("");
 				menu.AddItem(gc_ResetImplementations, false, OnResetImplementation);
+
+				if (ShaderGenerator2.DebugMode)
+				{
+					menu.AddItem(gc_debugCompareImplementations, false, () =>
+					{
+						var method = typeof(ShaderProperty.Implementation).GetMethod("CompareToDefaultImplementation", BindingFlags.Instance | BindingFlags.NonPublic);
+						foreach (var imp in this.implementations)
+						{
+							var genericMethod = method.MakeGenericMethod(imp.GetType());
+							genericMethod.Invoke(imp, null);
+						}
+					});
+				}
+
 				menu.ShowAsContext();
 			}
 
@@ -1145,6 +1225,7 @@ namespace ToonyColorsPro
 						continue;
 					}
 
+					// TODO same for Imp_MaterialProperty_Texture when using Shader Property UV ?
 					if (type == typeof(Imp_ShaderPropertyReference))
 					{
 						if (((Imp_ShaderPropertyReference)imp).LinkedShaderProperty != null && Imp_ShaderPropertyReference.IsReferencePossible(this, ((Imp_ShaderPropertyReference)imp).LinkedShaderProperty) != null)
@@ -1288,6 +1369,19 @@ namespace ToonyColorsPro
 					{
 						impSpRef.TryToFindLinkedShaderProperty();
 					}
+
+					var impMpTex = imp as Imp_MaterialProperty_Texture;
+					if (impMpTex != null && impMpTex.UvSource == Imp_MaterialProperty_Texture.UvSourceType.OtherShaderProperty)
+					{
+						impMpTex.TryToFindLinkedShaderProperty();
+					}
+
+					var impCC = imp as Imp_CustomCode;
+					if (impCC != null)
+					{
+						impCC.TryToFindPrependCodeBlock();
+						impCC.CheckReplacementTags();
+					}
 				}
 
 				CheckErrors();
@@ -1351,8 +1445,10 @@ namespace ToonyColorsPro
 				var r = rect;
 				r.x += labelWidth;
 				r.width -= labelWidth;
-				r.y += 2;
-				GUI.Label(r, typeLabel, SGUILayout.Styles.GrayMiniLabel);
+				using (new EditorGUI.DisabledScope(true))
+				{
+					GUI.Label(r, typeLabel, EditorStyles.miniLabel);
+				}
 
 
 				// help icon if there's a help message
@@ -1377,8 +1473,10 @@ namespace ToonyColorsPro
 				r = rect;
 				r.x += rect.width - programLabelWidth - rightMenuButtonWidth;
 				r.width = programLabelWidth;
-				r.y += 2;
-				GUI.Label(r, programLabel, SGUILayout.Styles.GrayMiniLabel);
+				using (new EditorGUI.DisabledScope(true))
+				{
+					GUI.Label(r, programLabel, EditorStyles.miniLabel);
+				}
 
 				// implementations copy/export/import menu
 				r = rect;
@@ -1534,8 +1632,20 @@ namespace ToonyColorsPro
 				return associatedData;
 			}
 
+			static Dictionary<string, ShaderProperty> CachedShaderPropertiesFromTemplate = new Dictionary<string, ShaderProperty>();
+
+			public static void ClearCache()
+			{
+				CachedShaderPropertiesFromTemplate.Clear();
+			}
+
 			public static ShaderProperty CreateFromTemplateData(string line)
 			{
+				if (CachedShaderPropertiesFromTemplate.ContainsKey(line))
+				{
+					return CachedShaderPropertiesFromTemplate[line];
+				}
+
 				var data = line.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
 				var variableType = (VariableType)Enum.Parse(typeof(VariableType), data[0]);
 
@@ -1606,6 +1716,9 @@ namespace ToonyColorsPro
 
 				shaderProperty.SetDefaultImplementations(list.ToArray());
 
+				// add cached so that they're not recreated at each SG2 change in the UI
+				CachedShaderPropertiesFromTemplate.Add(line, shaderProperty);
+
 				return shaderProperty;
 			}
 
@@ -1652,6 +1765,32 @@ namespace ToonyColorsPro
 						if (!string.IsNullOrEmpty(uv_screenspace))
 						{
 							((Imp_MaterialProperty_Texture)imp).SetScreenSpaceUV();
+						}
+
+
+						var uv_world_pos = GetAssociatedDataString(associatedData, "uv_worldpos", "");
+						if (!string.IsNullOrEmpty(uv_world_pos))
+						{
+							((Imp_MaterialProperty_Texture)imp).SetWorldPositionUV();
+						}
+
+						var uv_triplanar = GetAssociatedDataString(associatedData, "uv_triplanar", "");
+						if (!string.IsNullOrEmpty(uv_triplanar))
+						{
+							((Imp_MaterialProperty_Texture)imp).SetTriplanarUV();
+						}
+
+						var uv_shaderproperty = GetAssociatedDataString(associatedData, "uv_shaderproperty", "");
+						if (!string.IsNullOrEmpty(uv_shaderproperty))
+						{
+							((Imp_MaterialProperty_Texture)imp).SetShaderPropertyUV();
+							((Imp_MaterialProperty_Texture)imp).LinkedShaderPropertyName = uv_shaderproperty;
+
+							var swizzle = GetAssociatedDataString(associatedData, "swizzle", null);
+							if (!string.IsNullOrEmpty(swizzle))
+							{
+								((Imp_MaterialProperty_Texture)imp).UVChannels = swizzle;
+							}
 						}
 
 						break;
@@ -1716,6 +1855,27 @@ namespace ToonyColorsPro
 						var channels = GetAssociatedDataString(associatedData, "swizzle", null);
 						if (!string.IsNullOrEmpty(channels))
 							(imp as Imp_VertexColor).Channels = channels;
+					}
+					break;
+
+					case "world_position":
+					{
+						imp = new Imp_WorldPosition(shaderProperty);
+						var channels = GetAssociatedDataString(associatedData, "swizzle", null);
+						if (!string.IsNullOrEmpty(channels))
+							(imp as Imp_WorldPosition).Channels = channels;
+					}
+					break;
+
+					case "vertex_texcoord":
+					{
+						imp = new Imp_VertexTexcoord(shaderProperty);
+						var channels = GetAssociatedDataString(associatedData, "swizzle", null);
+						if (!string.IsNullOrEmpty(channels))
+							(imp as Imp_VertexTexcoord).Channels = channels;
+						var texcoordChannel = GetAssociatedDataInt(associatedData, "texcoord", -1);
+						if (texcoordChannel >= 0)
+							(imp as Imp_VertexTexcoord).TexcoordChannel = texcoordChannel;
 					}
 					break;
 
@@ -1793,6 +1953,15 @@ namespace ToonyColorsPro
 
 							break;
 						}
+					}
+					break;
+
+					case "constant_float":
+					{
+						imp = new Imp_ConstantFloat(shaderProperty)
+						{
+							FloatValue = GetAssociatedDataFloat(associatedData, "default", 0)
+						};
 					}
 					break;
 

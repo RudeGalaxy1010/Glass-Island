@@ -42,18 +42,9 @@ mult	lbl="Space"					kw=World Space|,View Space|DIRAMBIENT_VIEW		needs=DIRAMBIEN
 
 //================================================================
 
-#VARIABLES
-/// IF CUBE_AMBIENT
-	samplerCUBE _AmbientCube;
-///
+#FUNCTIONS
 /// IF DIRAMBIENT
-	fixed4 _TCP2_AMBIENT_RIGHT;
-	fixed4 _TCP2_AMBIENT_LEFT;
-	fixed4 _TCP2_AMBIENT_TOP;
-	fixed4 _TCP2_AMBIENT_BOTTOM;
-	fixed4 _TCP2_AMBIENT_FRONT;
-	fixed4 _TCP2_AMBIENT_BACK;
-	
+
 	half3 DirAmbient (half3 normal)
 	{
 		fixed3 retColor =
@@ -65,6 +56,22 @@ mult	lbl="Space"					kw=World Space|,View Space|DIRAMBIENT_VIEW		needs=DIRAMBIEN
 			saturate(-normal.z * _TCP2_AMBIENT_BACK);
 		return retColor * UNITY_LIGHTMODEL_AMBIENT.a;
 	}
+///
+#END
+
+//================================================================
+
+#VARIABLES
+/// IF CUBE_AMBIENT
+	samplerCUBE _AmbientCube;
+///
+/// IF DIRAMBIENT
+	fixed4 _TCP2_AMBIENT_RIGHT;
+	fixed4 _TCP2_AMBIENT_LEFT;
+	fixed4 _TCP2_AMBIENT_TOP;
+	fixed4 _TCP2_AMBIENT_BOTTOM;
+	fixed4 _TCP2_AMBIENT_FRONT;
+	fixed4 _TCP2_AMBIENT_BACK;
 ///
 #END
 

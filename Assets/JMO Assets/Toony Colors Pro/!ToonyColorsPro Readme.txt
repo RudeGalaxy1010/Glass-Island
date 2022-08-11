@@ -1,5 +1,5 @@
-Toony Colors Pro, version 2.4
-2020/04/01
+Toony Colors Pro, version 2.6
+2020/12/16
 © 2020 - Jean Moreno
 =============================
 
@@ -35,6 +35,151 @@ UPDATE NOTES
 ------------
 
 See full and formatted changelog here: https://jeanmoreno.com/unity/toonycolorspro/doc/changelog
+
+2.6.2
+### Fixed
+- Fixed TCP2_PlanarReflection script compilation error in some Unity versions when URP isn't installed
+
+2.6.1
+#### Added
+- [Shader Generator 2] (Default) (URP) Added "Planar Reflections" option that works with the eponymous script
+- [Shader Generator 2] Added vertex "Local Position", "Local Normal" and "World Normal" implementations for the "Shader Properties" system
+- Planar Reflection script now has an option to blur the reflection texture
+#### Modified
+- [Shader Generator 2] Reorganized vertex-based implementations into their own sub-menu ("Shader Properties" system)
+- [Shader Generator 2] Disabled "Aura 2" third party support as it's not actually needed for compatibility
+- Planar Reflection script now works with URP
+- Improved UI readability for Material Inspectors: using orange labels for headers, better spacing after certain headers
+#### Fixed
+- [Hybrid Shader] Fixed main directional light color/intensity affecting unlit parts too when it shouldn't
+- [Hybrid Shader] Fixed Occlusion being applied twice for the built-in rendering pipeline
+- [Shader Generator 2] (Default) (URP) Fixed shadow casting when using "Curved World 2020" support
+- [Shader Generator 2] (URP) Fixed "Sine Distortion" UV animation in the shadow pass when used with "World Position" UVs
+- [Shader Generator 2] Copying a shader now copies "Code Injection" settings
+- [Shader Generator 2] Fixed minor issues with the undo/redo system
+
+2.6
+#### Added
+- [Shader Generator 2] (Default) (URP) Added Water Effects in the default templates: vertex-based waves animation & depth-based effect (color, foam, transparency)
+- [Shader Generator 2] (Default) (URP) Added "Auto Optional Transparency" feature: it will add a "Rendering Mode" option in the material inspector to select opaque, fade or transparent mode (as in the Hybrid Shader)
+- [Shader Generator 2] (Default) (URP) Added "Custom Time" option in the "Special Effects" section: this will override the built-in shader _Time value with a custom vector, controlable with scripts
+- [Shader Generator 2] (Default) (URP) Added support for "Curved World 2020" third party asset
+- [Shader Generator 2] Added "Sine Distortion" UV animation for "Material Property/Texture" properties: use this water-like animation for almost any texture in your shader!
+- "TCP2_PlanarReflection" script: added option to define a custom background color, instead of inheriting the one from the main camera
+- [Documentation] Added sections about the aforementioned new features
+#### Modified
+- [Shader Generator 2] (Default) N.V-based effect like Rim Lighting now looks a bit better (less visible vertices artefacts in some cases)
+#### Fixed
+- [Shader Generator 2] (Default) (URP) Wind: fixed Wind Texture being sampled twice
+- [Shader Generator 2] (Default) (URP) Fixed N.V (e.g. rim effects) calculation for back faces
+- [Shader Generator 2] Performance optimizations when parsing template conditions (which happens every time an option is changed)
+
+2.5.4
+#### Added
+- [Shader Generator 2] Added "Code Injection" tab: this is a new system allowing to insert arbitrary code at various points in the shader file, for even more control over the resulting file. See the documentation to learn more!
+#### Modified
+- [Hybrid Shader] Optimizations and readability
+#### Fixed
+- [Shader Generator 2] (URP) Fixed compilation error with 'vertexNormalInput'
+- [Shader Generator 2] Fixed "Vertex UV" implementation sampling
+- [Hybrid Shader] Shadow and depth passes now respect the culling mode set in the material inspector
+- [Hybrid Shader] Fixed fog calculations for mobile platforms
+- [Demo] Updated the Cat Demo URP shaders with the latest template version (fixes compatibility with latest URP, notably shadows and VR)
+
+2.5.3
+#### Added
+- "Animated Dissolve" example shader in the "Demo TCP2 ShaderGenerator 2" scene
+- Added a tutorial about the creation of the "Animated Dissolve" shader in the documentation
+- [Shader Generator 2] Added "Triplanar" UV option for "Material Property/Texture" properties: use triplanar mapping for almost any texture in your shader!
+#### Modified
+- [Shader Generator 2] Improved "Shader Properties" UI, notably for Unity 2019.3+
+#### Fixed
+- "Hologram" demo shader is now in "Toony Colors Pro 2/Examples/SG2/Hologram" instead of the root of the shaders menu
+- [Shader Generator 2] (Default) (URP) Fixed compilation error where some features would miss variable declaration (e.g. Triplanar)
+
+2.5.2
+#### Added
+- Added back the "Cat Demo URP" package that wrongly disappeared, and removed the LWRP one
+- [Shader Generator 2] GPU Instancing options are now available in the OPTIONS section
+- [Shader Generator 2] (Default) (URP) Added "Apply Shadows before Ramp" feature
+#### Modified
+- [Shader Generator 2] Shader output is different and simplified: all variables for all passes will always be declared in an include block at the top now
+#### Fixed
+- [Hybrid Shader] Fixed compilation error for outline version when using UV2 as normals and textured outline
+- [Hybrid Shader] Fixed harmless GUI error when assigning Hybrid Shader Outline to a new material
+- [Hybrid Shader] Fixed [MainTexture] tag to identify _BaseMap as the main texture in the shader (Unity 2019.1+)
+- [Hybrid Shader Demo] Fixed UI issue when resolution isn't 720p
+- [Shader Generator 2] Fixed Shader Properties marked as "GPU Instanced"
+- [Shader Generator 2] "Silhouette Pass" now works with GPU Instancing
+- [Shader Generator 2] Fixed error when selecting an invalid shader in the "Current Shader" field
+- [Shader Generator 2] (URP) Fixed compilation errors with strict compilers (e.g. PS4)
+- [Shader Generator 2] (URP) Fixed "Affect Ambient" option for "Sketch" stylization feature
+- [Shader Generator 2] (URP) Fixed "View Dir Ambient Sampling" option
+- [Shader Generator 2] (URP) "SRP Batcher" option is removed and now always enabled, and it also fixes some compilation errors that could happen without it
+
+2.5.1
+#### Added
+- [Shader Generator 2] Check-boxes can now be toggled by clicking on their label
+#### Modified
+- [Hybrid Shader] Changed specular calculation for Stylized/Crisp types, so that it's visually more intuitive to change size/smoothness
+- [Documentation] Updated layout and added missing "Specular" section for "Hybrid Shader"
+#### Fixed
+- [Hybrid Shader] Added lightmap support for URP and Built-in
+- [Hybrid Shader] Reduced number of variants to compile when building when using the Outline version
+- [Shader Generator 2] Fixed placement of modules functions block after variables declaration; fixes "No Tile" option for textures and possibly other modules
+- [Shader Generator 2] (Default) (URP) Fixed "Unlit" ramp option that still needed a main directional light in the scene to work properly
+- [Shader Generator 2] (URP) Fixed compilation error when using "VertExmotion" option
+
+2.5
+#### Added
+- [TCP2 Hybrid Shader]: this is a new ubershader to replace the old Desktop/Mobile ones.
+  It adds a few options that were lacking, e.g. transparency, and is compatible with both the *Built-In* and *Universal render pipelines*.
+  Please read the documentation to know more!
+- Added new demo scene: "Demo TCP2 Hybrid Shader"
+- [Documentation] New updated documentation using the same format as the Shader Generator 2 documentation.
+  Some parts have been rewritten, and some have been added (e.g. Hybrid Shader).
+- [Smoothed Normals Utility] Updated the tool, now supporting "UV1", "UV3", "UV4" targets to store the normals, as well as storing them as "Full XYZ", "Compressed XY", "Compressed ZW" for UV targets.
+- [Shader Generator 2] (Default) (URP) Added "Bands" options for the "Ramp Style" feature in "Lighting"
+
+#### Modified
+- `Desktop` and `Mobile` shaders have been moved into the "Shaders/Legacy/" folder, as well as their shader path ("Toony Colors Pro 2/Legacy/")
+- `Standard PBS` shaders have been moved into the "Shaders/Standard PBS/" folder
+
+2.4.5
+#### Added
+- [Shader Generator 2] (Default) (URP) Added "Wrapped Lighting" feature in "Lighting"
+- [Shader Generator 2] (Default) (URP) Added "Shadow Line Strength" property for "Shadow Line", to help make larger lines
+- [Shader Generator 2] (Default) (URP) Exposed sine parameters as Shader Properties for "Wind" animation
+#### Fixed
+- [Shader Generator 2] (Default) (URP) Fixed fog and vertical fog when used with "Outline"
+- [Shader Generator 2] (Default) (URP) Fixed "Texture Splatting/Blending" error when using non-Linear blend and normal map
+- [Shader Generator 2] (URP) Fixed compilation error when "Outline" and "Silhouette Pass" are both enabled without "SRP Batcher Compatibility"
+- [Shader Generator 2] (URP) Fixed compilation error with "Hair Anisotropic" specular
+
+2.4.4
+#### Added
+- [Shader Generator 2] (Default) (URP) Added "Wind Animation" feature in "Special Effects"
+- [Shader Generator 2] (Default) (URP) Added "Hair Anisotropic" option for "Specular" feature
+- [Shader Generator 2] (Default) (URP) Added "Fresnel Reflections" option for Reflections features
+- [Shader Generator 2] (Default) (URP) Added "Unlit" option for "Ramp Style" feature
+- [Shader Generator 2] (Default) (URP) Added "Fresnel Reflections" options for "Reflections"
+- [Shader Generator 2] (URP) Added "Clamp Light Intensities" option when using "All Lights" shadow color shading: prevent received light from exceeding a defined value
+- [Shader Generator 2] (URP) Added "View Dir Ambient Sampling", allowing to have a solid color with no gradations on the whole mesh when sampling ambient color/light probes
+- [Shader Generator 2] (URP) Added "Special Implementation/Ambient Color" and "Indirect Diffuse" to sample those in other properties
+- [Shader Generator 2] Added "Other Shader Property" UV option for textures: use any other property as the UV source of a texture; this can allow more complicated UV calculations, or use the same source for multiple textures
+- [Shader Generator 2] Added "Constant Float" implementation for "Shader Properties"
+- [Shader Generator 1] Added "Shadow Color Texture" feature for the "Surface PBS" template
+- Added wind animation example in "Demo TCP2 ShaderGenerator 2" scene
+- Updated the "Features Reference" part of the documentation
+#### Fixed
+- [Shader Generator 2] (URP) Fixed main light culling layers
+- [Shader Generator 2] (URP) More SRP Batcher fixes
+- [Shader Generator 2] (URP) Compilation error when using "World Position" UV
+- [Shader Generator 2] (Default) (URP) Fixed Texture Blending with Normal Maps
+- [Shader Generator 2] Fixed missing text in some dynamic tooltips
+- [Shader Generator 2] Removed the "Fresnel" word from the Rim Lighting feature, as both words actually describe different things
+- Added a warning regarding mesh orientation for TCP2_PlanarReflection script
+- Fixed console warning because of a Font import settings
 
 2.4.33.2
 - [Shader Generator 2] (URP) Fixed possible compilation errors because of new "SRP Batcher Compatibility" option
