@@ -101,7 +101,7 @@ MonoBehaviour:
   _countTextCanvas: {fileID: 2252212730380682697}
   _additionalBrick: {fileID: 8880563215247213014}
   _movingSpeed: 5
-  _rotationSpeed: 100
+  _rotationSpeed: 300
 --- !u!1 &6512070976373041993
 GameObject:
   m_ObjectHideFlags: 0

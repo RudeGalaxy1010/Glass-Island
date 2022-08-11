@@ -26,6 +26,7 @@ namespace GlassIsland
             }
 
             transform.position = Vector3.MoveTowards(transform.position, _target.position, _movingSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, _target.rotation, _rotationSpeed * Time.deltaTime);
 
             if (transform.position == _target.position)
             {
@@ -37,7 +38,7 @@ namespace GlassIsland
         {
             player.AddBricks(_count);
             transform.SetParent(null);
-            _target = player.transform;
+            _target = player.LastBrickPoint;
             _countTextCanvas.gameObject.SetActive(false);
         }
 

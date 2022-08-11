@@ -1,3 +1,4 @@
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,6 +15,9 @@ namespace GlassIsland
 
         private int _score;
         private int _bricksCount;
+
+        public Transform LastBrickPoint => _bricksCount > 0 ? 
+            _bricks.Last(b => b.gameObject.activeSelf).transform : _bricks[0].transform;
 
         private void Start()
         {
