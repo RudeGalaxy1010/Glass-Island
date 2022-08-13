@@ -7392,7 +7392,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
-  m_LocalPosition: {x: 0, y: 5, z: -8}
+  m_LocalPosition: {x: 0, y: 5, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7413,7 +7413,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _target: {fileID: 569847077}
   _speed: 8
-  _offset: {x: 0, y: 5, z: -8}
+  _offset: {x: 0, y: 5, z: -7}
   _defaultTarget: {fileID: 631907602}
 --- !u!1001 &968122641
 PrefabInstance:
@@ -15933,6 +15933,18 @@ PrefabInstance:
       propertyPath: _smoothFollow
       value: 
       objectReference: {fileID: 963194229}
+    - target: {fileID: 7971180938276180916, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 963194227}
+    - target: {fileID: 7971180938276180916, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: m_PlaneDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7971180938276180916, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: m_SortingLayerID
+      value: 1139911351
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
 --- !u!114 &312875135206600224 stripped

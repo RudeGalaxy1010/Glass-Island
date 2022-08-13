@@ -10,6 +10,7 @@ Material:
   m_Name: Coin Yellow
   m_Shader: {fileID: 4800000, guid: f8d49205b3b0a644195633020367689d, type: 3}
   m_ValidKeywords:
+  - TCP2_RAMPTEXT
   - TCP2_SPEC_TOON
   - TCP2_STYLIZED_FRESNEL
   m_InvalidKeywords: []
@@ -59,7 +60,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 2800000, guid: abc83c21d57d4a74cabe12065fa1a8b2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7fe85df733e76164b912c7ade9e31f71, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -82,7 +83,7 @@ Material:
     - _RampSmoothAdd: 0.75
     - _RampThreshold: 1
     - _RimMax: 1
-    - _RimMin: 0.327
+    - _RimMin: 1
     - _RimStrength: 1
     - _Shininess: 0.1
     - _SmoothnessTextureChannel: 0
@@ -91,7 +92,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TCP2_DISABLE_WRAPPED_LIGHT: 0
-    - _TCP2_RAMPTEXT: 0
+    - _TCP2_RAMPTEXT: 1
     - _TCP2_SPEC_TOON: 1
     - _TCP2_STYLIZED_FRESNEL: 1
     - _TexLod: 5
@@ -99,9 +100,9 @@ Material:
     - _ZSmooth: -0.5
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.99607843, g: 0.87058824, b: 0.14117648, a: 1}
+    - _Color: {r: 1, g: 0.75559396, b: 0.20784312, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HColor: {r: 0.9433962, g: 0.8043299, b: 0, a: 1}
+    - _HColor: {r: 0.9056604, g: 0.777008, b: 0.32894266, a: 1}
     - _OutlineColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _RimColor: {r: 0.8, g: 0.8, b: 0.8, a: 0.6}
     - _SColor: {r: 1, g: 1, b: 1, a: 1}

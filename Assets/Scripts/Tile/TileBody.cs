@@ -12,6 +12,7 @@ namespace GlassIsland
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _extinctTime;
+        [SerializeField] private float _extinctDelay;
 
         private Vector3 _idlePosition;
         private Vector3 _pressedPosition;
@@ -69,7 +70,7 @@ namespace GlassIsland
         {
             _timer -= Time.deltaTime;
 
-            float materialAlpha = _timer / _extinctTime;
+            float materialAlpha = Mathf.Min(_timer / _extinctTime, 1);
             _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, materialAlpha);
 
             if (_timer <= 0)
@@ -91,7 +92,7 @@ namespace GlassIsland
         private void StartDissolving()
         {
             _isDissolving = true;
-            _timer = _extinctTime;
+            _timer = _extinctTime + _extinctDelay;
         }
     }
 }
