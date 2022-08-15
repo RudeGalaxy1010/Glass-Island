@@ -8,7 +8,7 @@ namespace GlassIsland
         public event UnityAction Dissolved;
 
         [SerializeField] private TileButton _tileButton;
-        [SerializeField] private GameObject _hexagon;
+        [SerializeField] private GameObject[] _dissolvingParts;
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _extinctTime;
@@ -21,16 +21,25 @@ namespace GlassIsland
         private float _timer;
         private bool _isDissolving;
 
-        private Material _material;
+        private Material[] _materials;
+        private float[] _maxAlphas;
 
-        public bool IsDissolved => _hexagon.activeSelf == false;
+        public bool IsDissolved => _dissolvingParts[0].activeSelf == false;
 
         private void Start()
         {
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
-            _material = _hexagon.GetComponent<Renderer>().material;
+
+            _materials = new Material[_dissolvingParts.Length];
+            _maxAlphas = new float[_dissolvingParts.Length];
+
+            for (int i = 0; i < _dissolvingParts.Length; i++)
+            {
+                _materials[i] = _dissolvingParts[i].GetComponent<Renderer>().material;
+                _maxAlphas[i] = _materials[i].color.a;
+            }
         }
 
         private void Update()
@@ -55,8 +64,16 @@ namespace GlassIsland
 
             if (player.TrySubtractBrick())
             {
-                _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, 1);
-                _hexagon.SetActive(true);
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, _maxAlphas[i]);
+                }
+
+                foreach (var dissolvingPart in _dissolvingParts)
+                {
+                    dissolvingPart.SetActive(true);
+                }
+
                 _isDissolving = false;
             }
         }
@@ -70,12 +87,19 @@ namespace GlassIsland
         {
             _timer -= Time.deltaTime;
 
-            float materialAlpha = Mathf.Min(_timer / _extinctTime, 1);
-            _material.color = new Color(_material.color.r, _material.color.g, _material.color.b, materialAlpha);
+            for (int i = 0; i < _materials.Length; i++)
+            {
+                float materialAlpha = Mathf.Min(_timer / _extinctTime, _maxAlphas[i]);
+                _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, materialAlpha);
+            }
 
             if (_timer <= 0)
             {
-                _hexagon.SetActive(false);
+                foreach (var dissolvingPart in _dissolvingParts)
+                {
+                    dissolvingPart.SetActive(false);
+                }
+
                 _isDissolving = false;
                 Dissolved?.Invoke();
             }

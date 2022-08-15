@@ -7,19 +7,18 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Tile Orange
+  m_Name: Red
   m_Shader: {fileID: 4800000, guid: f8d49205b3b0a644195633020367689d, type: 3}
   m_ValidKeywords:
   - TCP2_DISABLE_WRAPPED_LIGHT
-  - TCP2_RAMPTEXT
   - TCP2_SPEC_TOON
   - TCP2_STYLIZED_FRESNEL
-  - _ALPHAPREMULTIPLY_ON
-  m_InvalidKeywords:
-  - TCP2_OUTLINE_CONST_SIZE
-  - TCP2_UV_NORMALS_FULL
+  - _ALPHABLEND_ON
+  - _GLOSSYREFLECTIONS_OFF
+  - _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap:
@@ -65,7 +64,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 2800000, guid: f760770c15faa194891ae3b444f7d103, type: 3}
+        m_Texture: {fileID: 2800000, guid: f7efee5cdbe39254082e87a9ddcf42e4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -74,49 +73,34 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
-    - _DstBlendOutline: 9
-    - _GlossMapScale: 1
-    - _Glossiness: 0
-    - _GlossyReflections: 1
+    - _GlossMapScale: 0.5
+    - _Glossiness: 1
+    - _GlossyReflections: 0
     - _Metallic: 0
-    - _Mode: 3
-    - _NormalsSource: 0
-    - _NormalsUVType: 0
+    - _Mode: 2
     - _OcclusionStrength: 1
-    - _Offset1: 0
-    - _Offset2: 0
-    - _Outline: 1
     - _Parallax: 0.02
-    - _RampSmooth: 0.1
+    - _RampSmooth: 0.2
     - _RampSmoothAdd: 0.75
-    - _RampThreshold: 0.5
+    - _RampThreshold: 0.261
     - _RimMax: 1
-    - _RimMin: 0.327
-    - _RimStrength: 2
-    - _Shininess: 0.06
-    - _SmoothnessTextureChannel: 0
+    - _RimMin: 0.084
+    - _RimStrength: 0.23
+    - _SmoothnessTextureChannel: 1
     - _SpecBlend: 1
-    - _SpecSmooth: 0.35
+    - _SpecSmooth: 1
     - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _SrcBlendOutline: 2
+    - _SrcBlend: 5
     - _TCP2_DISABLE_WRAPPED_LIGHT: 1
-    - _TCP2_OUTLINE_CONST_SIZE: 1
-    - _TCP2_OUTLINE_TEXTURED: 0
-    - _TCP2_RAMPTEXT: 1
+    - _TCP2_RAMPTEXT: 0
     - _TCP2_SPEC_TOON: 1
     - _TCP2_STYLIZED_FRESNEL: 1
-    - _TCP2_ZSMOOTH_ON: 0
-    - _TexLod: 0
     - _UVSec: 0
-    - _ZSmooth: -1.37
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 0.96862745, g: 0.4509804, b: 0.16078432, a: 1}
+    - _Color: {r: 0.6037736, g: 0.5382699, b: 0.6037736, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HColor: {r: 0.9490197, g: 0.4431373, b: 0.13333334, a: 1}
-    - _OutlineColor: {r: 1, g: 0, b: 0, a: 1}
+    - _HColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 0.8, g: 0.8, b: 0.8, a: 0.6}
-    - _SColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _SColor: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
   m_BuildTextureStacks: []
