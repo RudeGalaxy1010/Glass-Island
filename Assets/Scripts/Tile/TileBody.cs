@@ -93,7 +93,7 @@ namespace GlassIsland
                 _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, materialAlpha);
             }
 
-            if (_timer <= 0)
+            if (_timer <= -_extinctTime)
             {
                 foreach (var dissolvingPart in _dissolvingParts)
                 {
@@ -116,7 +116,7 @@ namespace GlassIsland
         private void StartDissolving()
         {
             _isDissolving = true;
-            _timer = _extinctTime + _extinctDelay;
+            _timer = _extinctTime / 2f + _extinctDelay;
         }
     }
 }
