@@ -10,14 +10,15 @@ namespace GlassIsland
         public event UnityAction<int> ScoreChanged;
 
         [SerializeField] private string _name;
-        [SerializeField] private BrickStack[] _bricks;
+        [SerializeField] private GameObject[] _bricks;
+        [SerializeField] private float _brickHeight;
+        [SerializeField] private Transform _bricksTargetPoint;
         [SerializeField] private TMP_Text _nameText;
 
         private int _score;
         private int _bricksCount;
 
-        public Transform LastBrickPoint => _bricksCount > 0 ? 
-            _bricks.Last(b => b.gameObject.activeSelf).transform : _bricks[0].transform;
+        public Transform LastBrickPoint => _bricksTargetPoint;
 
         private void Start()
         {
@@ -34,14 +35,15 @@ namespace GlassIsland
         {
             foreach (var brick in _bricks)
             {
-                brick.gameObject.SetActive(false);
+                brick.SetActive(false);
             }
 
             int bricksToShow = bricksCount < _bricks.Length ? bricksCount : _bricks.Length;
 
             for (int i = 0; i < bricksToShow; i++)
             {
-                _bricks[i].gameObject.SetActive(true);
+                _bricks[i].SetActive(true);
+                _bricksTargetPoint.position = _bricks[i].transform.position + _bricks[i].transform.up * _brickHeight;
             }
         }
 

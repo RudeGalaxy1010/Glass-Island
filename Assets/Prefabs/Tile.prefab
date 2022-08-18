@@ -146,7 +146,7 @@ MonoBehaviour:
   _tileButton: {fileID: -6498308853732425845}
   _dissolvingParts:
   - {fileID: 1919840159266582255}
-  _shift: {x: 0, y: -0.075, z: 0}
+  _shift: {x: 0, y: -0.135, z: 0}
   _moveSpeed: 1
   _extinctTime: 0.75
   _extinctDelay: 1.1
