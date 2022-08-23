@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 2756395704885869552}
   - component: {fileID: 118316263485378362}
   - component: {fileID: 4143619991471465910}
+  - component: {fileID: 5553808650222982345}
   m_Layer: 6
-  m_Name: Visible part
+  m_Name: Dissolvable Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -98,6 +99,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 3163171260390484736, guid: 28e577ab21d4dfa40856efddf2b59264, type: 3}
+--- !u!114 &5553808650222982345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919840159266582255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e51cc402ef592a4cb27d0801fb6f0d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _renderers:
+  - {fileID: 118316263485378362}
 --- !u!1 &5155408403862259318
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,8 +159,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tileButton: {fileID: -6498308853732425845}
-  _dissolvingBody: {fileID: 1919840159266582255}
-  _dissolvingCollectables:
+  _dissolvingBody: {fileID: 5553808650222982345}
+  _dissolvableItems:
   - {fileID: 7554679742825717429}
   - {fileID: 2339743075262039408}
   _shift: {x: 0, y: -0.125, z: 0}

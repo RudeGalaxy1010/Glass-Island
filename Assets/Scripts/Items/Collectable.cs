@@ -4,9 +4,8 @@ using UnityEngine.Events;
 namespace GlassIsland
 {
     [RequireComponent(typeof(Collider))]
-    public abstract class Collectable : MonoBehaviour
+    public abstract class Collectable : Dissolvable
     {
-        public event UnityAction<Collectable> PickedUp;
         public abstract void Init(int value);
         public abstract void PickUp(Player player);
 
@@ -15,7 +14,7 @@ namespace GlassIsland
             if (other.TryGetComponent(out Player player))
             {
                 PickUp(player);
-                PickedUp?.Invoke(this);
+                FinishDissolving(true);
             }
         }
     }

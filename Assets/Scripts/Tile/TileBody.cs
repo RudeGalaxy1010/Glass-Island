@@ -9,8 +9,8 @@ namespace GlassIsland
         public event UnityAction Dissolved;
 
         [SerializeField] private TileButton _tileButton;
-        [SerializeField] private GameObject _dissolvingBody;
-        [SerializeField] private List<Collectable> _dissolvingCollectables;
+        [SerializeField] private Dissolvable _dissolvingBody;
+        [SerializeField] private List<Dissolvable> _dissolvableItems;
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _extinctTime;
@@ -23,26 +23,21 @@ namespace GlassIsland
         private float _timer;
         private bool _isDissolving;
 
-        private Material _bodyMaterial;
-        private List<Material> _materials;
-        private float _maxBodyAlpha;
-        private List<float> _maxAlphas;
-
-        public bool IsDissolved => _dissolvingBody.activeSelf == false;
+        public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
         private void OnEnable()
         {
-            foreach (var dissolvingCollectable in _dissolvingCollectables)
+            foreach (var dissolvingCollectable in _dissolvableItems)
             {
-                dissolvingCollectable.PickedUp += RemoveCollectable;
+                dissolvingCollectable.Dissolved += RemoveCollectable;
             }
         }
 
         private void OnDisable()
         {
-            foreach (var dissolvingCollectable in _dissolvingCollectables)
+            foreach (var dissolvingCollectable in _dissolvableItems)
             {
-                dissolvingCollectable.PickedUp -= RemoveCollectable;
+                dissolvingCollectable.Dissolved -= RemoveCollectable;
             }
         }
 
@@ -51,17 +46,6 @@ namespace GlassIsland
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
-
-            _bodyMaterial = _dissolvingBody.GetComponent<Renderer>().material;
-            _materials = new List<Material>();
-            _maxBodyAlpha = _bodyMaterial.color.a;
-            _maxAlphas = new List<float>();
-
-            for (int i = 0; i < _dissolvingCollectables.Count; i++)
-            {
-                _materials.Add(_dissolvingCollectables[i].GetComponentInChildren<Renderer>().material);
-                _maxAlphas.Add(_materials[i].color.a);
-            }
         }
 
         private void Update()
@@ -86,8 +70,7 @@ namespace GlassIsland
 
             if (player.TrySubtractBrick())
             {
-                _dissolvingBody.SetActive(true);
-                _bodyMaterial.color = new Color(_bodyMaterial.color.r, _bodyMaterial.color.g, _bodyMaterial.color.b, _maxBodyAlpha);
+                _dissolvingBody.Appear();
                 _isDissolving = false;
             }
         }
@@ -101,14 +84,21 @@ namespace GlassIsland
         {
             _timer -= Time.deltaTime;
 
-            for (int i = 0; i < _materials.Count; i++)
-            {
-                float materialAlpha = Mathf.Min(_timer / _extinctTime, _maxAlphas[i]);
-                _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, materialAlpha);
-            }
+            //for (int i = 0; i < _materials.Count; i++)
+            //{
+            //    float materialAlpha = Mathf.Min(_timer / _extinctTime, _maxAlphas[i]);
+            //    _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, materialAlpha);
+            //}
 
-            float bodyAlpha = Mathf.Min(_timer / _extinctTime, _maxBodyAlpha);
-            _bodyMaterial.color = new Color(_bodyMaterial.color.r, _bodyMaterial.color.g, _bodyMaterial.color.b, bodyAlpha);
+            //float bodyAlpha = Mathf.Min(_timer / _extinctTime, _maxBodyAlpha);
+            //_bodyMaterial.color = new Color(_bodyMaterial.color.r, _bodyMaterial.color.g, _bodyMaterial.color.b, bodyAlpha);
+
+            _dissolvingBody.SetAlpha(_timer / _extinctTime);
+
+            foreach (var dissolvingItem in _dissolvableItems)
+            {
+                dissolvingItem.SetAlpha(_timer / _extinctTime);
+            }
 
             if (_timer <= -_extinctTime)
             {
@@ -118,12 +108,20 @@ namespace GlassIsland
 
         private void FinishDissolving()
         {
-            foreach (var dissolvingPart in _dissolvingCollectables)
+            int dissolvableCount = _dissolvableItems.Count;
+
+            for (int i = 0; i < dissolvableCount; i++)
             {
-                dissolvingPart.gameObject.SetActive(false);
+                _dissolvableItems[i].FinishDissolving();
+
+                if (dissolvableCount != _dissolvableItems.Count)
+                {
+                    dissolvableCount = _dissolvableItems.Count;
+                    i--;
+                }
             }
 
-            _dissolvingBody.SetActive(false);
+            _dissolvingBody.FinishDissolving();
             _isDissolving = false;
             Dissolved?.Invoke();
         }
@@ -142,10 +140,10 @@ namespace GlassIsland
             _timer = _extinctTime / 2f + _extinctDelay;
         }
 
-        private void RemoveCollectable(Collectable collectable)
+        private void RemoveCollectable(Dissolvable dissolvable)
         {
-            collectable.PickedUp -= RemoveCollectable;
-            _dissolvingCollectables.Remove(collectable);
+            dissolvable.Dissolved -= RemoveCollectable;
+            _dissolvableItems.Remove(dissolvable);
         }
     }
 }

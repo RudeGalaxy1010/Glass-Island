@@ -367,6 +367,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02516ce903e3eff4c9e3962827ba7414, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _renderers:
+  - {fileID: 3255055226286783705}
+  - {fileID: 3255055225500053895}
   _countTextCanvas: {fileID: 3255055225279952965}
   _additionalBrick: {fileID: 3255055225500053914}
   _movingSpeed: 4

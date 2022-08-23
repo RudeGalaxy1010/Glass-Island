@@ -4961,6 +4961,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c924ebf71fa7d4ea0830da510b8b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _renderers:
+  - {fileID: 8960068533953275668}
   _scaleAnimation: {fileID: 5245929157897010761}
 --- !u!111 &5245929157897010761
 Animation:
