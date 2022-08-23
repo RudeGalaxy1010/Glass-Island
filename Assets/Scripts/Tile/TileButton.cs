@@ -70,16 +70,6 @@ namespace GlassIsland
             }
 
             _isPressed = true;
-
-            if (_bricks.gameObject.activeSelf)
-            {
-                _bricks.PickUp(player);
-            }
-            else if (_coin.gameObject.activeSelf)
-            {
-                _coin.PickUp(player);
-            }
-
             _body.Press(player);
         }
 

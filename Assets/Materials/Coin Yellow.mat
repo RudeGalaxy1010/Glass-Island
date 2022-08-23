@@ -14,6 +14,7 @@ Material:
   - TCP2_REFLECTIONS_FRESNEL
   - TCP2_RIM_LIGHTING_LIGHTMASK
   - TCP2_SPECULAR_STYLIZED
+  - _ALPHAPREMULTIPLY_ON
   m_InvalidKeywords:
   - TCP2_UV_NORMALS_FULL
   - _GLOSSYREFLECTIONS_OFF
@@ -21,7 +22,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -98,7 +99,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DirectIntensityOutline: 1
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EmissionChannel: 4
     - _FresnelMax: 1.5
     - _FresnelMin: 0
@@ -138,7 +139,7 @@ Material:
     - _ReceiveShadowsOff: 1
     - _ReflectionMapType: 0
     - _ReflectionSmoothness: 1
-    - _RenderingMode: 0
+    - _RenderingMode: 2
     - _RimMax: 2
     - _RimMin: 0.31
     - _RimStrength: 1
@@ -175,7 +176,7 @@ Material:
     - _UseShadowTexture: 0
     - _UseSpecular: 0
     - _ZSmooth: -0.5
-    - _ZWrite: 1
+    - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.8962264, g: 0.62821186, b: 0.19023676, a: 1}
     - _Color: {r: 0.8113208, g: 0.71115154, b: 0.019134922, a: 1}

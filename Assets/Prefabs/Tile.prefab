@@ -144,8 +144,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tileButton: {fileID: -6498308853732425845}
-  _dissolvingParts:
-  - {fileID: 1919840159266582255}
+  _dissolvingBody: {fileID: 1919840159266582255}
+  _dissolvingCollectables:
+  - {fileID: 7554679742825717429}
+  - {fileID: 2339743075262039408}
   _shift: {x: 0, y: -0.125, z: 0}
   _moveSpeed: 1
   _extinctTime: 0.75
