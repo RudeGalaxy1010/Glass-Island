@@ -167,6 +167,7 @@ MonoBehaviour:
   _moveSpeed: 1
   _extinctTime: 0.75
   _extinctDelay: 1.1
+  _needFadeByFirstPress: 0
 --- !u!1 &6270958449999909098
 GameObject:
   m_ObjectHideFlags: 0
