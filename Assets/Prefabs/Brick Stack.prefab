@@ -372,8 +372,8 @@ MonoBehaviour:
   - {fileID: 3255055225500053895}
   _countTextCanvas: {fileID: 3255055225279952965}
   _additionalBrick: {fileID: 3255055225500053914}
-  _movingSpeed: 4
-  _rotationSpeed: 250
+  _movingSpeed: 5
+  _rotationSpeed: 260
 --- !u!65 &12859345756844687
 BoxCollider:
   m_ObjectHideFlags: 0
