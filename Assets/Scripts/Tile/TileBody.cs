@@ -15,6 +15,7 @@ namespace GlassIsland
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _extinctTime;
         [SerializeField] private float _extinctDelay;
+        [SerializeField] private bool _needFadeByFirstPress;
 
         private Vector3 _idlePosition;
         private Vector3 _pressedPosition;
@@ -62,17 +63,19 @@ namespace GlassIsland
         {
             _targetPosition = _pressedPosition;
 
-            if (IsDissolved == false && _isDissolving == false)
-            {
-                StartDissolving();
-                return;
-            }
-
-            if (player.TrySubtractBrick())
+            if ((IsDissolved || _isDissolving) && player.TrySubtractBrick())
             {
                 _dissolvingBody.Appear();
                 _isDissolving = false;
+                
+                if (_needFadeByFirstPress == false)
+                {
+                    return;
+                }
             }
+
+            _isDissolving = true;
+            _timer = _extinctTime / 2f + _extinctDelay;
         }
 
         public void Unpress()
@@ -83,16 +86,6 @@ namespace GlassIsland
         private void Dissolve()
         {
             _timer -= Time.deltaTime;
-
-            //for (int i = 0; i < _materials.Count; i++)
-            //{
-            //    float materialAlpha = Mathf.Min(_timer / _extinctTime, _maxAlphas[i]);
-            //    _materials[i].color = new Color(_materials[i].color.r, _materials[i].color.g, _materials[i].color.b, materialAlpha);
-            //}
-
-            //float bodyAlpha = Mathf.Min(_timer / _extinctTime, _maxBodyAlpha);
-            //_bodyMaterial.color = new Color(_bodyMaterial.color.r, _bodyMaterial.color.g, _bodyMaterial.color.b, bodyAlpha);
-
             _dissolvingBody.SetAlpha(_timer / _extinctTime);
 
             foreach (var dissolvingItem in _dissolvableItems)
@@ -132,12 +125,6 @@ namespace GlassIsland
             {
                 transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _moveSpeed * Time.deltaTime);
             }
-        }
-
-        private void StartDissolving()
-        {
-            _isDissolving = true;
-            _timer = _extinctTime / 2f + _extinctDelay;
         }
 
         private void RemoveCollectable(Dissolvable dissolvable)
