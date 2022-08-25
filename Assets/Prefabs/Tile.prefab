@@ -164,7 +164,8 @@ MonoBehaviour:
   - {fileID: 7554679742825717429}
   - {fileID: 2339743075262039408}
   _shift: {x: 0, y: -0.125, z: 0}
-  _moveSpeed: 1
+  _downSpeed: 0.8
+  _upSpeed: 1.5
   _extinctTime: 0.75
   _extinctDelay: 1.1
   _needFadeByFirstPress: 0

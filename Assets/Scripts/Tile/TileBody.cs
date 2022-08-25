@@ -12,7 +12,8 @@ namespace GlassIsland
         [SerializeField] private Dissolvable _dissolvingBody;
         [SerializeField] private List<Dissolvable> _dissolvableItems;
         [SerializeField] private Vector3 _shift;
-        [SerializeField] private float _moveSpeed;
+        [SerializeField] private float _downSpeed;
+        [SerializeField] private float _upSpeed;
         [SerializeField] private float _extinctTime;
         [SerializeField] private float _extinctDelay;
         [SerializeField] private bool _needFadeByFirstPress;
@@ -121,9 +122,11 @@ namespace GlassIsland
 
         private void Move()
         {
+            float speed = _targetPosition == _pressedPosition ? _downSpeed : _upSpeed;
+
             if (transform.position != _targetPosition)
             {
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, _targetPosition, speed * Time.deltaTime);
             }
         }
 
