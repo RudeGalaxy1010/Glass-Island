@@ -5,25 +5,31 @@ namespace GlassIsland
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMove : MonoBehaviour
     {
-        private const float GroundDistance = 0.2f;
+        private const float GroundDistance = 0.15f;
         private const float GroundPinForce = -2f;
 
         private const float IdleAnimatorSpeed = 1;
         private const float MaxDirectionVectorLength = 1.41f;
 
+        [SerializeField] private float _speed;
+        [SerializeField] private float _jumpHeight;
+        [SerializeField] private float _gravityScale;
         [SerializeField] private Animator _animator;
         [SerializeField] private Joystick _joystick;
-        [SerializeField] private float _speed;
         [SerializeField] private Transform _groundCheck;
         [SerializeField] private LayerMask _groundMask;
 
         private bool _isGrounded;
-        private Vector3 _gravitationVelocity;
+        private bool _isJumped;
+        private float _jumpVelocity;
+        private float _verticalVelocity;
         private CharacterController _controller;
 
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
+            _jumpVelocity = Mathf.Sqrt(_jumpHeight * -2f * (Physics.gravity.y * _gravityScale));
+            _isJumped = true;
         }
 
         private void Update()
@@ -31,6 +37,7 @@ namespace GlassIsland
             Move();
             CheckGround();
             ApplyGravitation();
+            TryJump();
             Rotate();
         }
 
@@ -60,6 +67,29 @@ namespace GlassIsland
                 _animator.SetBool(PlayerAnimatorConstants.RunningAnimation, false);
                 _animator.speed = IdleAnimatorSpeed;
             }
+
+            _controller.Move(Vector3.up * _verticalVelocity * Time.deltaTime);
+        }
+
+        private void TryJump()
+        {
+            if (_isGrounded == true)
+            {
+                _isJumped = false;
+                return;
+            }
+
+            if (_isJumped == true)
+            {
+                return;
+            }
+
+            if (_isGrounded == false)
+            {
+                _animator.SetTrigger(PlayerAnimatorConstants.JumpAnimation);
+                _verticalVelocity = _jumpVelocity;
+                _isJumped = true;
+            }
         }
 
         private void Rotate()
@@ -78,14 +108,13 @@ namespace GlassIsland
 
         private void ApplyGravitation()
         {
-            if (_isGrounded && _gravitationVelocity.y < 0)
+            if (_isGrounded && _verticalVelocity < 0)
             {
-                _gravitationVelocity.y = GroundPinForce;
+                _verticalVelocity = GroundPinForce;
                 return;
             }
 
-            _gravitationVelocity.y += Physics.gravity.y * Time.deltaTime;
-            _controller.Move(_gravitationVelocity * Time.deltaTime);
+            _verticalVelocity += Physics.gravity.y * _gravityScale * Time.deltaTime;
         }
     }
 }

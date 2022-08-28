@@ -179,7 +179,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6270958449999909099}
   - component: {fileID: -6498308853732425845}
-  - component: {fileID: 6841151666263804853}
+  - component: {fileID: 6262403046558089351}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -220,8 +220,8 @@ MonoBehaviour:
   _body: {fileID: 3312049968117680428}
   _bricks: {fileID: 2339743075262039408}
   _coin: {fileID: 7554679742825717429}
---- !u!65 &6841151666263804853
-BoxCollider:
+--- !u!135 &6262403046558089351
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -231,8 +231,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.6, y: 0.6, z: 0.6}
-  m_Center: {x: 0, y: 0.5, z: 0}
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &393229884814393102
 PrefabInstance:
   m_ObjectHideFlags: 0

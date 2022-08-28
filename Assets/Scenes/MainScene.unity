@@ -10483,10 +10483,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tile (35)
       objectReference: {fileID: 0}
-    - target: {fileID: 6270958449999909098, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
       propertyPath: m_RootOrder
       value: 28
@@ -16960,7 +16956,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 312875135375849842, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 312875135375849842, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
       propertyPath: m_LocalPosition.y
@@ -17014,14 +17010,6 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 963194227}
-    - target: {fileID: 7971180938276180916, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
-      propertyPath: m_PlaneDistance
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7971180938276180916, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
-      propertyPath: m_SortingLayerID
-      value: 1139911351
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
 --- !u!114 &312875135206600224 stripped
