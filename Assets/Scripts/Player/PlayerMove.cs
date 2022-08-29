@@ -6,7 +6,7 @@ namespace GlassIsland
     public class PlayerMove : MonoBehaviour
     {
         private const float GroundDistance = 0.15f;
-        private const float GroundPinForce = -2f;
+        private const float GroundPinForce = -1f;
 
         private const float IdleAnimatorSpeed = 1;
         private const float MaxDirectionVectorLength = 1.41f;
@@ -84,7 +84,7 @@ namespace GlassIsland
                 return;
             }
 
-            if (_isGrounded == false)
+            if (_isGrounded == false && _joystick.Direction.magnitude > 0)
             {
                 _animator.SetTrigger(PlayerAnimatorConstants.JumpAnimation);
                 _verticalVelocity = _jumpVelocity;

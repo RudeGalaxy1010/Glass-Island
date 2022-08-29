@@ -14,6 +14,7 @@ namespace GlassIsland
             if (other.TryGetComponent(out Player player))
             {
                 PickUp(player);
+                Appear();
                 FinishDissolving(true);
             }
         }
