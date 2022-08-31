@@ -335,8 +335,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1f27672fd0cff147b1eadbeb515977b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 2.2
-  _jumpHeight: 0.5
+  _speed: 2.5
+  _jumpHeight: 0.35
   _gravityScale: 1
   _animator: {fileID: 8352617120017286448}
   _joystick: {fileID: 3238445653126464845}

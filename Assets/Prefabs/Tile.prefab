@@ -166,7 +166,7 @@ MonoBehaviour:
   _shift: {x: 0, y: -0.125, z: 0}
   _downSpeed: 0.8
   _upSpeed: 1.5
-  _extinctTime: 0.25
+  _extinctTime: 0.4
   _extinctDelay: 1
   _needFadeByFirstPress: 0
 --- !u!1 &6270958449999909098

@@ -5,7 +5,7 @@ namespace GlassIsland
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMove : MonoBehaviour
     {
-        private const float GroundDistance = 0.15f;
+        private const float GroundDistance = 0.2f;
         private const float GroundPinForce = -1f;
 
         private const float IdleAnimatorSpeed = 1;
