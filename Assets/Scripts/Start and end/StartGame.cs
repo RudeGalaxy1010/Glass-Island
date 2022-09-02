@@ -7,8 +7,12 @@ namespace GlassIsland
     {
         [SerializeField] Move[] _players;
         [SerializeField] private float _startHeight;
-        [SerializeField] private float _spreading;
+        [SerializeField] private float _radius;
         [SerializeField] private float _startDelay;
+
+        private float _objectsCounter;
+
+        private float angleOffset => 180f / _players.Length;
 
         private void Start()
         {
@@ -23,8 +27,9 @@ namespace GlassIsland
 
         private Vector3 GetRandomPosition()
         {
-            Vector3 position = Random.insideUnitSphere * _spreading;
-            return new Vector3(position.x, _startHeight, position.z);
+            float angle = _objectsCounter * Mathf.PI * 2f / _players.Length + angleOffset;
+            _objectsCounter++;
+            return transform.position + new Vector3(Mathf.Cos(angle) * _radius, 0, Mathf.Sin(angle) * _radius);
         }
 
         private IEnumerator EnablePlayers(float delay)
