@@ -6,7 +6,6 @@ namespace GlassIsland
 {
     public class Character : MonoBehaviour
     {
-        public event UnityAction<int> ScoreChanged;
         public event UnityAction<Character> Died;
 
         [SerializeField] private string _name;
@@ -20,6 +19,7 @@ namespace GlassIsland
         private int _bricksCount;
 
         public Transform LastBrickPoint => _bricksTargetPoint;
+        public int Score => _score;
 
         private void Start()
         {
@@ -35,7 +35,6 @@ namespace GlassIsland
         public void AddScore(int value)
         {
             _score += value;
-            ScoreChanged?.Invoke(_score);
         }
 
         private void UpdateStorage(int bricksCount)

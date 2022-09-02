@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -9,20 +8,20 @@ namespace GlassIsland
     {
         [SerializeField] private Player _player;
         [SerializeField] private TMP_Text _scoreText;
+        [SerializeField] private float _scoreCalcDuration;
 
         private void OnEnable()
         {
-            _player.ScoreChanged += UpdateScoreText;
+            StartCoroutine(UpdateScoreText(_player.Score));
         }
 
-        private void OnDisable()
+        private IEnumerator UpdateScoreText(int value)
         {
-            _player.ScoreChanged -= UpdateScoreText;
-        }
-
-        private void UpdateScoreText(int value)
-        {
-            _scoreText.text = value.ToString();
+            for (int i = 0; i < value; i++)
+            {
+                _scoreText.text = $"+{i}";
+                yield return new WaitForSeconds(_scoreCalcDuration / value);
+            }
         }
     }
 }
