@@ -60,11 +60,11 @@ namespace GlassIsland
             Move();
         }
 
-        public void Press(Player player)
+        public void Press(Character character)
         {
             _targetPosition = _pressedPosition;
 
-            if ((IsDissolved || _isDissolving) && player.TrySubtractBrick())
+            if ((IsDissolved || _isDissolving) && character.TrySubtractBrick())
             {
                 _dissolvingBody.Appear();
                 _isDissolving = false;

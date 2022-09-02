@@ -5,7 +5,6 @@ namespace GlassIsland
     public class AIInput : InputBase
     {
         private const float ReachDistance = 0.15f;
-        private const float MinDistanceToDestination = 2f;
 
         [SerializeField] private Vector2 _limitsX;
         [SerializeField] private Vector2 _limitsZ;
@@ -39,10 +38,7 @@ namespace GlassIsland
 
         private void ChangeDestinationPoint()
         {
-            while ((_destinationPoint - transform.position).magnitude < MinDistanceToDestination)
-            {
-                _destinationPoint = new Vector3(Random.Range(_limitsX.x, _limitsX.y), 0, Random.Range(_limitsZ.x, _limitsZ.y));
-            }
+            _destinationPoint = new Vector3(Random.Range(_limitsX.x, _limitsX.y), 0, Random.Range(_limitsZ.x, _limitsZ.y));
         }
     }
 }

@@ -48,21 +48,21 @@ namespace GlassIsland
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent(out Player player))
+            if (other.TryGetComponent(out Character character))
             {
-                Press(player);
+                Press(character);
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.TryGetComponent(out Player player))
+            if (other.TryGetComponent(out Character character))
             {
                 Unpress();
             }
         }
 
-        private void Press(Player player)
+        private void Press(Character character)
         {
             if (_isPressed == true)
             {
@@ -70,7 +70,7 @@ namespace GlassIsland
             }
 
             _isPressed = true;
-            _body.Press(player);
+            _body.Press(character);
         }
 
         private void Unpress()
