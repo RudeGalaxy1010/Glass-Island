@@ -308,6 +308,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _name: Player 01
+  _nameText: {fileID: 8958099672514001531}
   _bricks:
   - {fileID: 5352868069152956869}
   - {fileID: 6754508566395745924}
@@ -323,7 +324,6 @@ MonoBehaviour:
   - {fileID: 2703274277612729363}
   _brickHeight: 0.1
   _bricksTargetPoint: {fileID: 4741670801632935078}
-  _nameText: {fileID: 8958099672514001531}
 --- !u!114 &1635708659735374789
 MonoBehaviour:
   m_ObjectHideFlags: 0

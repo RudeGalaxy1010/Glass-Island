@@ -3,30 +3,25 @@ using UnityEngine;
 namespace GlassIsland
 {
     [RequireComponent(typeof(Player))]
-    public class EndGame : MonoBehaviour
+    public class EndGame : DieCondition
     {
         [SerializeField] private float _minHeight;
         [SerializeField] private GameObject _endScreen;
         [SerializeField] private SmoothFollow _smoothFollow;
 
-        private Player _player;
-        private Move _playerMove;
+        private Move _move;
 
         private void Start()
         {
-            _player = GetComponent<Player>();
-            _playerMove = GetComponent<Move>();
+            _move = GetComponent<Move>();
         }
 
-        private void Update()
+        protected override void Die()
         {
-            if (transform.position.y <= _minHeight)
-            {
-                _playerMove.enabled = false;
-                _smoothFollow.SetDefaultTarget();
-                _endScreen.SetActive(true);
-                _player.Die();
-            }
+            _move.enabled = false;
+            _smoothFollow.SetDefaultTarget();
+            _endScreen.SetActive(true);
+            base.Die();
         }
     }
 }

@@ -2892,6 +2892,7 @@ GameObject:
   - component: {fileID: 723890257835504970}
   - component: {fileID: 2870273583553962249}
   - component: {fileID: 3559663130951109326}
+  - component: {fileID: 4284474401017304745}
   - component: {fileID: 3559663130372318422}
   m_Layer: 0
   m_Name: Bot
@@ -3000,6 +3001,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _limitsX: {x: -4, y: 4}
   _limitsZ: {x: -1, y: 6}
+  _stackProcessTime: 1
+--- !u!114 &4284474401017304745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3833118016024114111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f253e48333b47fe42b11dbf86b668754, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3559663130372318422
 MonoBehaviour:
   m_ObjectHideFlags: 0

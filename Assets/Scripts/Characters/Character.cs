@@ -7,6 +7,7 @@ namespace GlassIsland
     public class Character : MonoBehaviour
     {
         public event UnityAction<int> ScoreChanged;
+        public event UnityAction<Character> Died;
 
         [SerializeField] private string _name;
         [SerializeField] private TMP_Text _nameText;
@@ -67,6 +68,7 @@ namespace GlassIsland
 
         public void Die()
         {
+            Died?.Invoke(this);
             Destroy(gameObject);
         }
     }
