@@ -250,6 +250,7 @@ GameObject:
   - component: {fileID: 1635708659735374789}
   - component: {fileID: 3082562456757876036}
   - component: {fileID: 763424282}
+  - component: {fileID: 312875135206600227}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -339,7 +340,7 @@ MonoBehaviour:
   _jumpHeight: 0.35
   _gravityScale: 1
   _animator: {fileID: 8352617120017286448}
-  _joystick: {fileID: 3238445653126464845}
+  _input: {fileID: 312875135206600227}
   _groundCheck: {fileID: 9150621339165361108}
   _groundMask:
     serializedVersion: 2
@@ -377,6 +378,19 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &312875135206600227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312875135375849843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ebfd47add644c40a2194aec94fd231, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _joystick: {fileID: 3238445653126464845}
 --- !u!1 &1415583547357834457
 GameObject:
   m_ObjectHideFlags: 0

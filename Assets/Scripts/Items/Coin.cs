@@ -15,7 +15,7 @@ namespace GlassIsland
             _isPickedUp = false;
         }
 
-        public override void PickUp(Player player)
+        public override void PickUp(Character character)
         {
             if (_isPickedUp == true)
             {
@@ -24,13 +24,13 @@ namespace GlassIsland
 
             _isPickedUp = true;
             _scaleAnimation.Play();
-            StartCoroutine(Disable(player, _scaleAnimation.clip.length));
+            StartCoroutine(Disable(character, _scaleAnimation.clip.length));
         }
 
-        private IEnumerator Disable(Player player, float time)
+        private IEnumerator Disable(Character character, float time)
         {
             yield return new WaitForSeconds(time);
-            player.AddScore(_value);
+            character.AddScore(_value);
             gameObject.SetActive(false);
         }
     }

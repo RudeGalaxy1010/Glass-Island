@@ -5,7 +5,7 @@ namespace GlassIsland
 {
     public class StartGame : MonoBehaviour
     {
-        [SerializeField] PlayerMove[] _players;
+        [SerializeField] Move[] _players;
         [SerializeField] private float _startHeight;
         [SerializeField] private float _spreading;
         [SerializeField] private float _startDelay;

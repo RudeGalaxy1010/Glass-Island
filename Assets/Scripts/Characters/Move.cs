@@ -3,7 +3,7 @@ using UnityEngine;
 namespace GlassIsland
 {
     [RequireComponent(typeof(CharacterController))]
-    public class PlayerMove : MonoBehaviour
+    public class Move : MonoBehaviour
     {
         private const float GroundDistance = 0.2f;
         private const float GroundPinForce = -1f;
@@ -15,7 +15,7 @@ namespace GlassIsland
         [SerializeField] private float _jumpHeight;
         [SerializeField] private float _gravityScale;
         [SerializeField] private Animator _animator;
-        [SerializeField] private Joystick _joystick;
+        [SerializeField] private InputBase _input;
         [SerializeField] private Transform _groundCheck;
         [SerializeField] private LayerMask _groundMask;
 
@@ -34,7 +34,7 @@ namespace GlassIsland
 
         private void Update()
         {
-            Move();
+            MoveByInput();
             CheckGround();
             ApplyGravitation();
             TryJump();
@@ -53,11 +53,11 @@ namespace GlassIsland
             enabled = false;
         }
 
-        private void Move()
+        private void MoveByInput()
         {
-            if (_joystick.Direction.magnitude > 0)
+            if (_input.Velocity.magnitude > 0)
             {
-                var moveDirection = new Vector3(_joystick.Direction.x, 0, _joystick.Direction.y);
+                var moveDirection = _input.Velocity;
                 _controller.Move(moveDirection * _speed * Time.deltaTime);
                 _animator.SetBool(PlayerAnimatorConstants.RunningAnimation, true);
                 _animator.speed = moveDirection.magnitude / MaxDirectionVectorLength;
@@ -84,7 +84,7 @@ namespace GlassIsland
                 return;
             }
 
-            if (_isGrounded == false && _joystick.Direction.magnitude > 0)
+            if (_isGrounded == false && _input.Velocity.magnitude > 0)
             {
                 _animator.SetTrigger(PlayerAnimatorConstants.JumpAnimation);
                 _verticalVelocity = _jumpVelocity;
@@ -94,10 +94,11 @@ namespace GlassIsland
 
         private void Rotate()
         {
-            if (_joystick.Direction.magnitude > 0)
+            Vector3 lookDirection = _input.Velocity * _speed * Time.deltaTime;
+
+            if (lookDirection.magnitude > 0)
             {
-                var lookDirection = new Vector3(_joystick.Direction.x, 0, _joystick.Direction.y);
-                transform.rotation = Quaternion.LookRotation(lookDirection * _speed * Time.deltaTime);
+                transform.rotation = Quaternion.LookRotation(lookDirection);
             }
         }
 

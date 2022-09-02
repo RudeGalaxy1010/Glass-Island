@@ -10,12 +10,12 @@ namespace GlassIsland
         [SerializeField] private SmoothFollow _smoothFollow;
 
         private Player _player;
-        private PlayerMove _playerMove;
+        private Move _playerMove;
 
         private void Start()
         {
             _player = GetComponent<Player>();
-            _playerMove = GetComponent<PlayerMove>();
+            _playerMove = GetComponent<Move>();
         }
 
         private void Update()

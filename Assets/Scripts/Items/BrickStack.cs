@@ -11,7 +11,7 @@ namespace GlassIsland
 
         private Transform _target;
         private int _count;
-        private Player _player;
+        private Character _character;
         private bool _isPickedUp;
 
         public override void Init(int bricksCount)
@@ -33,11 +33,11 @@ namespace GlassIsland
             if (transform.position == _target.position)
             {
                 gameObject.SetActive(false);
-                _player.AddBricks(_count);
+                _character.AddBricks(_count);
             }
         }
 
-        public override void PickUp(Player player)
+        public override void PickUp(Character character)
         {
             if (_isPickedUp == true)
             {
@@ -45,9 +45,9 @@ namespace GlassIsland
             }
 
             _isPickedUp = true;
-            _player = player;
+            _character = character;
             transform.SetParent(null);
-            _target = player.LastBrickPoint;
+            _target = character.LastBrickPoint;
             _countTextCanvas.gameObject.SetActive(false);
         }
 
