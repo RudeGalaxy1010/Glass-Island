@@ -5,7 +5,6 @@ namespace GlassIsland
     public class AIInput : InputBase
     {
         private const float ReachDistance = 0.15f;
-        private const float MinDestinationDistance = 2f;
 
         [SerializeField] private Vector2 _limitsX;
         [SerializeField] private Vector2 _limitsZ;
@@ -14,6 +13,11 @@ namespace GlassIsland
         private Vector3 _destinationPoint;
         private Vector3 _stackPosition;
         private float _stackProcessTimer;
+
+        private bool _isLimitsReached => Mathf.Abs(transform.position.x - _limitsX.x) < ReachDistance
+            || Mathf.Abs(_limitsX.y - transform.position.x) < ReachDistance
+            || Mathf.Abs(transform.position.z - _limitsZ.x) < ReachDistance
+            || Mathf.Abs(_limitsZ.y - transform.position.z) < ReachDistance;
 
         private void Start()
         {
@@ -51,13 +55,15 @@ namespace GlassIsland
 
         private void CheckReachDestination()
         {
-            if (Velocity.magnitude <= ReachDistance)
+            var distance = Vector3.Distance(transform.position, _destinationPoint);
+            
+            if (distance <= ReachDistance || _isLimitsReached)
             {
                 ChangeDestinationPoint();
             }
         }
 
-        private void ChangeDestinationPoint()
+        public void ChangeDestinationPoint()
         {
             _destinationPoint = new Vector3(Random.Range(_limitsX.x, _limitsX.y), 0, Random.Range(_limitsZ.x, _limitsZ.y));
             UpdateVelocity();

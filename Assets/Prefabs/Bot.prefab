@@ -3000,8 +3000,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b333bb58f03eaa488a0fe8978c38a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _limitsX: {x: -3, y: 3}
-  _limitsZ: {x: 0, y: 5}
+  _limitsX: {x: -4, y: 5}
+  _limitsZ: {x: -1.25, y: 6.75}
   _stackProcessTime: 1
 --- !u!114 &4284474401017304745
 MonoBehaviour:
