@@ -324,6 +324,7 @@ MonoBehaviour:
   - {fileID: 2703274277612729363}
   _brickHeight: 0.1
   _bricksTargetPoint: {fileID: 4741670801632935078}
+  _outline: {fileID: 763424282}
 --- !u!114 &1635708659735374789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,7 +373,7 @@ MonoBehaviour:
   outlineMode: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 5
-  precomputeOutline: 0
+  precomputeOutline: 1
   bakeKeys: []
   bakeValues: []
 --- !u!114 &312875135206600227

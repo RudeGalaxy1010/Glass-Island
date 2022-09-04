@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +8,7 @@ namespace GlassIsland
         [SerializeField] private GameObject _losePanel;
         [SerializeField] private Player _player;
         [SerializeField] private List<Character> _bots;
+        [SerializeField] private List<Move> _botMoves;
         [SerializeField] private SmoothFollow _smoothFollow;
 
         private void OnEnable()
@@ -46,7 +46,12 @@ namespace GlassIsland
         {
             foreach (var bot in _bots)
             {
-                bot.GetComponent<Move>().enabled = false;
+                bot.DisableOutline();
+            }
+
+            foreach (var bot in _botMoves)
+            {
+                bot.Disable();
             }
 
             _smoothFollow.SetDefaultTarget();

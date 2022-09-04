@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace GlassIsland
@@ -44,13 +45,20 @@ namespace GlassIsland
         public void Enable()
         {
             _controller.enabled = true;
+            ResetAnimator();
             enabled = true;
         }
 
         public void Disable()
         {
             _controller.enabled = false;
+            ResetAnimator();
             enabled = false;
+        }
+
+        private void ResetAnimator()
+        {
+            _animator.SetBool(PlayerAnimatorConstants.RunningAnimation, false);
         }
 
         private void MoveByInput()

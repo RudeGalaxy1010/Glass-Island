@@ -4948,6 +4948,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _winPanel: {fileID: 1947151725}
+  _player: {fileID: 312875135206600224}
   _playerMove: {fileID: 687505462}
   _bots:
   - {fileID: 3559663129030055533}
@@ -4975,6 +4976,12 @@ MonoBehaviour:
   - {fileID: 1203618740}
   - {fileID: 867936666}
   - {fileID: 1079439146}
+  _botMoves:
+  - {fileID: 1635708661253781349}
+  - {fileID: 2130189885}
+  - {fileID: 1203618739}
+  - {fileID: 867936665}
+  - {fileID: 1079439145}
   _smoothFollow: {fileID: 963194229}
 --- !u!1001 &638345353
 PrefabInstance:

@@ -14,6 +14,7 @@ namespace GlassIsland
         [SerializeField] private GameObject[] _bricks;
         [SerializeField] private float _brickHeight;
         [SerializeField] private Transform _bricksTargetPoint;
+        [SerializeField] private Outline _outline;
 
         private int _score;
         private int _bricksCount;
@@ -69,6 +70,11 @@ namespace GlassIsland
         {
             Died?.Invoke(this);
             Destroy(gameObject);
+        }
+
+        public void DisableOutline()
+        {
+            _outline.enabled = false;
         }
     }
 }

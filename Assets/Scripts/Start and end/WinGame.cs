@@ -6,6 +6,7 @@ namespace GlassIsland
     public class WinGame : MonoBehaviour
     {
         [SerializeField] private GameObject _winPanel;
+        [SerializeField] private Player _player;
         [SerializeField] private Move _playerMove;
         [SerializeField] private List<Character> _bots;
 
@@ -38,7 +39,14 @@ namespace GlassIsland
 
         private void Win()
         {
-            _playerMove.enabled = false;
+            _playerMove.Disable();
+            _player.DisableOutline();
+
+            foreach (var bot in _bots)
+            {
+                bot.DisableOutline();
+            }
+
             _winPanel.SetActive(true);
         }
     }

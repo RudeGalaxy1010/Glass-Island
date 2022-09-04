@@ -2966,6 +2966,7 @@ MonoBehaviour:
   - {fileID: 1505754115943956191}
   _brickHeight: 0.1
   _bricksTargetPoint: {fileID: 8118788058159609450}
+  _outline: {fileID: 3559663130372318422}
 --- !u!114 &2870273583553962249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2999,8 +3000,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b333bb58f03eaa488a0fe8978c38a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _limitsX: {x: -4, y: 4}
-  _limitsZ: {x: -1, y: 6}
+  _limitsX: {x: -3, y: 3}
+  _limitsZ: {x: 0, y: 5}
   _stackProcessTime: 1
 --- !u!114 &4284474401017304745
 MonoBehaviour:
@@ -3029,7 +3030,7 @@ MonoBehaviour:
   outlineMode: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 5
-  precomputeOutline: 0
+  precomputeOutline: 1
   bakeKeys: []
   bakeValues: []
 --- !u!1 &4795211851234163744

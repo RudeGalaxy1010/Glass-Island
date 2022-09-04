@@ -59,11 +59,7 @@ namespace GlassIsland
 
         private void ChangeDestinationPoint()
         {
-            while (Vector3.Distance(_destinationPoint, new Vector3(transform.position.x, 0, transform.position.y)) < MinDestinationDistance)
-            {
-                _destinationPoint = new Vector3(Random.Range(_limitsX.x, _limitsX.y), 0, Random.Range(_limitsZ.x, _limitsZ.y));
-            }
-
+            _destinationPoint = new Vector3(Random.Range(_limitsX.x, _limitsX.y), 0, Random.Range(_limitsZ.x, _limitsZ.y));
             UpdateVelocity();
         }
     }
