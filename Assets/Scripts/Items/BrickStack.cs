@@ -17,7 +17,7 @@ namespace GlassIsland
         public override void Init(int bricksCount)
         {
             _count = bricksCount;
-            UpdateCountText();
+            UpdateStackView();
         }
 
         private void Update()
@@ -51,9 +51,9 @@ namespace GlassIsland
             _countTextCanvas.gameObject.SetActive(false);
         }
 
-        private void UpdateCountText()
+        private void UpdateStackView()
         {
-            if (_count == 5)
+            if (_count > 1)
             {
                 _countTextCanvas.gameObject.SetActive(true);
                 _additionalBrick.SetActive(true);

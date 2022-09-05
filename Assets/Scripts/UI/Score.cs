@@ -22,6 +22,8 @@ namespace GlassIsland
                 _scoreText.text = $"+{i}";
                 yield return new WaitForSeconds(_scoreCalcDuration / value);
             }
+
+            _scoreText.text = $"+{value}";
         }
     }
 }

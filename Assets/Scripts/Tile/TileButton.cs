@@ -1,11 +1,14 @@
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace GlassIsland
 {
     [RequireComponent(typeof(Collider))]
     public class TileButton : MonoBehaviour
     {
+        private const int CoinValue = 5;
+        private const int SingleBrickValue = 1;
+        private const int BrickStackValue = 5;
+
         [SerializeField] private TileBody _body;
         [SerializeField] private BrickStack _bricks;
         [SerializeField] private Coin _coin;
@@ -32,17 +35,17 @@ namespace GlassIsland
             if (randomValue <= _coinChance)
             {
                 _coin.gameObject.SetActive(true);
-                _coin.Init(1);
+                _coin.Init(CoinValue);
             }
             else if (randomValue <= _coinChance + _singleBrickChance)
             {
                 _bricks.gameObject.SetActive(true);
-                _bricks.Init(1);
+                _bricks.Init(SingleBrickValue);
             }
             else if (randomValue <= _coinChance + _singleBrickChance + _fiveBricksChance)
             {
                 _bricks.gameObject.SetActive(true);
-                _bricks.Init(5);
+                _bricks.Init(BrickStackValue);
             }
         }
 
