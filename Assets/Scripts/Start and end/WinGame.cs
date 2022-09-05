@@ -26,11 +26,6 @@ namespace GlassIsland
             }
         }
 
-        private void Start()
-        {
-            Win();
-        }
-
         private void OnBotDied(Character bot)
         {
             bot.Died -= OnBotDied;
