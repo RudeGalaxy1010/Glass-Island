@@ -169,8 +169,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Player 01
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 71b341111d4023048bc1bd5e0f543982, type: 2}
-  m_sharedMaterial: {fileID: 7174900714134943646, guid: 71b341111d4023048bc1bd5e0f543982, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5abe5313b44f977479f35ff2b044604e, type: 2}
+  m_sharedMaterial: {fileID: -6730840740389136420, guid: 5abe5313b44f977479f35ff2b044604e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -194,7 +194,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.85
+  m_fontSize: 14.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
