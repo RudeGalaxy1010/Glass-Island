@@ -69,7 +69,7 @@ namespace GlassIsland
         public void Die()
         {
             Died?.Invoke(this);
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
 
         public void DisableOutline()
