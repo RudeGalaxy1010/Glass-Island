@@ -10,6 +10,7 @@ namespace GlassIsland
         [SerializeField] private List<Character> _bots;
         [SerializeField] private List<Move> _botMoves;
         [SerializeField] private SmoothFollow _smoothFollow;
+        [SerializeField] private GameObject _joystick;
 
         private void OnEnable()
         {
@@ -55,6 +56,7 @@ namespace GlassIsland
             }
 
             _smoothFollow.SetDefaultTarget();
+            _joystick.SetActive(false);
             _losePanel.SetActive(true);
         }
     }

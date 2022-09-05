@@ -9,6 +9,7 @@ namespace GlassIsland
         [SerializeField] private Player _player;
         [SerializeField] private Move _playerMove;
         [SerializeField] private List<Character> _bots;
+        [SerializeField] private GameObject _joystick;
 
         private void OnEnable()
         {
@@ -41,6 +42,7 @@ namespace GlassIsland
         {
             _playerMove.Disable();
             _player.DisableOutline();
+            _joystick.SetActive(false);
 
             foreach (var bot in _bots)
             {

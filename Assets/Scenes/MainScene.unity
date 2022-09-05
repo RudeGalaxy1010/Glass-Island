@@ -4894,7 +4894,7 @@ GameObject:
   - component: {fileID: 631907604}
   - component: {fileID: 631907605}
   m_Layer: 0
-  m_Name: Start Game
+  m_Name: Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4958,6 +4958,7 @@ MonoBehaviour:
   - {fileID: 1203618740}
   - {fileID: 867936666}
   - {fileID: 1079439146}
+  _joystick: {fileID: 1383893906}
 --- !u!114 &631907605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4985,6 +4986,7 @@ MonoBehaviour:
   - {fileID: 867936665}
   - {fileID: 1079439145}
   _smoothFollow: {fileID: 963194229}
+  _joystick: {fileID: 1383893906}
 --- !u!1001 &638345353
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12262,6 +12264,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6270958449999909099, guid: e4f6699f6cd6f2a49bb58b0a3d410b98, type: 3}
   m_PrefabInstance: {fileID: 1377302588}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1383893906 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1773273829, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+  m_PrefabInstance: {fileID: 312875135206600223}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1421811956
 PrefabInstance:
