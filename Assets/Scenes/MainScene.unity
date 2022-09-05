@@ -7141,7 +7141,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 723890257835504970, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: _name
-      value: Bot 04
+      value: Friendo
       objectReference: {fileID: 0}
     - target: {fileID: 3559663129230526500, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
@@ -10158,7 +10158,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 723890257835504970, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: _name
-      value: Bot 05
+      value: Hawk
       objectReference: {fileID: 0}
     - target: {fileID: 3559663129230526500, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
@@ -11058,7 +11058,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 723890257835504970, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: _name
-      value: Bot 03
+      value: Guest0041
       objectReference: {fileID: 0}
     - target: {fileID: 3559663129230526500, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
@@ -17955,7 +17955,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 723890257835504970, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: _name
-      value: Bot 02
+      value: Mini Mini
       objectReference: {fileID: 0}
     - target: {fileID: 3559663129230526500, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
@@ -18056,6 +18056,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 312875135375849841, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: _name
+      value: Guest3775
+      objectReference: {fileID: 0}
     - target: {fileID: 312875135375849841, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
       propertyPath: _color.a
       value: 1
@@ -18163,6 +18167,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 723890257835504970, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _name
+      value: Cat
+      objectReference: {fileID: 0}
     - target: {fileID: 3559663129230526500, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
       value: 
