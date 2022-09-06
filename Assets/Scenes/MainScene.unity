@@ -8297,7 +8297,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _target: {fileID: 569847077}
   _speed: 8
-  _offset: {x: 0, y: 5, z: -5.5}
+  _offset: {x: 0, y: 6, z: -5}
   _defaultTarget: {fileID: 631907602}
 --- !u!1001 &968122641
 PrefabInstance:
@@ -16700,7 +16700,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1947151726
 RectTransform:
   m_ObjectHideFlags: 0
