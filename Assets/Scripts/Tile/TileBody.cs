@@ -4,6 +4,7 @@ using UnityEngine.Events;
 
 namespace GlassIsland
 {
+    [RequireComponent(typeof(Collider))]
     public class TileBody : MonoBehaviour
     {
         public event UnityAction Dissolved;
@@ -24,6 +25,7 @@ namespace GlassIsland
 
         private float _timer;
         private bool _isDissolving;
+        private Collider _collider;
 
         public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
@@ -45,6 +47,7 @@ namespace GlassIsland
 
         private void Start()
         {
+            _collider = GetComponent<Collider>();
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
@@ -67,6 +70,7 @@ namespace GlassIsland
             if ((IsDissolved || _isDissolving) && character.TrySubtractBrick())
             {
                 _dissolvingBody.Appear();
+                _collider.enabled = true;
                 _isDissolving = false;
                 
                 if (_needFadeByFirstPress == false)
@@ -116,6 +120,7 @@ namespace GlassIsland
             }
 
             _dissolvingBody.FinishDissolving();
+            _collider.enabled = false;
             _isDissolving = false;
             Dissolved?.Invoke();
         }
@@ -124,9 +129,9 @@ namespace GlassIsland
         {
             float speed = _targetPosition == _pressedPosition ? _downSpeed : _upSpeed;
 
-            if (transform.position != _targetPosition)
+            if (_dissolvingBody.transform.position != _targetPosition)
             {
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition, speed * Time.deltaTime);
+                _dissolvingBody.transform.position = Vector3.MoveTowards(_dissolvingBody.transform.position, _targetPosition, speed * Time.deltaTime);
             }
         }
 
