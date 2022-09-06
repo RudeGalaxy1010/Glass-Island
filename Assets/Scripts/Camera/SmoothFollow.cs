@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SmoothFollow : MonoBehaviour
 {
-    private const float MinYDifference = 0.2f;
+    private const float MinYDifference = 0.25f;
 
     [SerializeField] private Transform _target;
     [SerializeField] private float _speed = 12.5f;
