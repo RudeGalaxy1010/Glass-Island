@@ -25,7 +25,6 @@ namespace GlassIsland
 
         private float _timer;
         private bool _isDissolving;
-        private Collider _collider;
 
         public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
@@ -47,7 +46,6 @@ namespace GlassIsland
 
         private void Start()
         {
-            _collider = GetComponent<Collider>();
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
@@ -69,8 +67,8 @@ namespace GlassIsland
 
             if ((IsDissolved || _isDissolving) && character.TrySubtractBrick())
             {
+                gameObject.SetActive(true);
                 _dissolvingBody.Appear();
-                _collider.enabled = true;
                 _isDissolving = false;
                 
                 if (_needFadeByFirstPress == false)
@@ -120,7 +118,7 @@ namespace GlassIsland
             }
 
             _dissolvingBody.FinishDissolving();
-            _collider.enabled = false;
+            gameObject.SetActive(false);
             _isDissolving = false;
             Dissolved?.Invoke();
         }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace GlassIsland
@@ -7,7 +6,7 @@ namespace GlassIsland
     public class Move : MonoBehaviour
     {
         private const float GroundDistance = 0.15f;
-        private const float GroundPinForce = -1f;
+        private const float GroundPinForce = -2f;
 
         private const float IdleAnimatorSpeed = 1;
         private const float MaxDirectionVectorLength = 1.41f;
@@ -63,10 +62,10 @@ namespace GlassIsland
 
         private void MoveByInput()
         {
-            if (_input.Velocity.magnitude > 0)
+            Vector3 moveDirection = _input.Velocity;
+
+            if (moveDirection.magnitude > 0)
             {
-                var moveDirection = _input.Velocity;
-                _controller.Move(moveDirection * _speed * Time.deltaTime);
                 _animator.SetBool(PlayerAnimatorConstants.RunningAnimation, true);
                 _animator.speed = moveDirection.magnitude / MaxDirectionVectorLength;
             }
@@ -76,7 +75,7 @@ namespace GlassIsland
                 _animator.speed = IdleAnimatorSpeed;
             }
 
-            _controller.Move(Vector3.up * _verticalVelocity * Time.deltaTime);
+            _controller.Move((moveDirection * _speed + Vector3.up * _verticalVelocity) * Time.deltaTime);
         }
 
         private void TryJump()
@@ -117,7 +116,7 @@ namespace GlassIsland
 
         private void ApplyGravitation()
         {
-            if (_isGrounded && _verticalVelocity < 0)
+            if (_isGrounded && _verticalVelocity < GroundPinForce)
             {
                 _verticalVelocity = GroundPinForce;
                 return;
