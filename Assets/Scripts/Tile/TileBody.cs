@@ -25,7 +25,8 @@ namespace GlassIsland
         private Vector3 _targetPosition;
 
         private float _timer;
-        private bool _isDissolving;
+        private bool _needAppearing;
+        private bool _needDissolving;
 
         public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
@@ -50,18 +51,17 @@ namespace GlassIsland
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
-            _timer = _appearTime;
         }
 
         private void Update()
         {
-            if (_isDissolving == true)
-            {
-                Dissolve();
-            }
-            else
+            if (_needAppearing == true)
             {
                 Appear();
+            }
+            else if (_needDissolving == true)
+            {
+                Dissolve();
             }
 
             Move();
@@ -71,11 +71,12 @@ namespace GlassIsland
         {
             _targetPosition = _pressedPosition;
 
-            if ((IsDissolved || _isDissolving) && character.TrySubtractBrick())
+            if ((IsDissolved || _needDissolving) && character.TrySubtractBrick())
             {
                 gameObject.SetActive(true);
                 _dissolvingBody.gameObject.SetActive(true);
-                _isDissolving = false;
+                _needAppearing = true;
+                _needDissolving = false;
                 _timer = 0;
 
                 if (_needFadeByFirstPress == false)
@@ -84,7 +85,7 @@ namespace GlassIsland
                 }
             }
 
-            _isDissolving = true;
+            _needDissolving = true;
             _timer = _extinctTime / 2f + _extinctDelay;
         }
 
@@ -95,8 +96,9 @@ namespace GlassIsland
 
         private void Appear()
         {
-            if (_timer > _appearTime)
+            if (_timer / _appearTime > 1)
             {
+                _needAppearing = false;
                 return;
             }
 
@@ -142,7 +144,7 @@ namespace GlassIsland
 
             _dissolvingBody.FinishDissolving();
             gameObject.SetActive(false);
-            _isDissolving = false;
+            _needDissolving = false;
             Dissolved?.Invoke();
         }
 
