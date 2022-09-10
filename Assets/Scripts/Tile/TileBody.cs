@@ -17,6 +17,7 @@ namespace GlassIsland
         [SerializeField] private float _upSpeed;
         [SerializeField] private float _extinctTime;
         [SerializeField] private float _extinctDelay;
+        [SerializeField] private float _appearTime;
         [SerializeField] private bool _needFadeByFirstPress;
 
         private Vector3 _idlePosition;
@@ -49,6 +50,7 @@ namespace GlassIsland
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
+            _timer = _appearTime;
         }
 
         private void Update()
@@ -56,6 +58,10 @@ namespace GlassIsland
             if (_isDissolving == true)
             {
                 Dissolve();
+            }
+            else
+            {
+                Appear();
             }
 
             Move();
@@ -68,9 +74,10 @@ namespace GlassIsland
             if ((IsDissolved || _isDissolving) && character.TrySubtractBrick())
             {
                 gameObject.SetActive(true);
-                _dissolvingBody.Appear();
+                _dissolvingBody.gameObject.SetActive(true);
                 _isDissolving = false;
-                
+                _timer = 0;
+
                 if (_needFadeByFirstPress == false)
                 {
                     return;
@@ -84,6 +91,22 @@ namespace GlassIsland
         public void Unpress()
         {
             _targetPosition = _idlePosition;
+        }
+
+        private void Appear()
+        {
+            if (_timer > _appearTime)
+            {
+                return;
+            }
+
+            _timer += Time.deltaTime;
+            _dissolvingBody.SetAlpha(_timer / _appearTime);
+
+            foreach (var dissolvingItem in _dissolvableItems)
+            {
+                dissolvingItem.SetAlpha(_timer / _appearTime);
+            }
         }
 
         private void Dissolve()

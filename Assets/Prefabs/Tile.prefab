@@ -154,6 +154,7 @@ MonoBehaviour:
   _upSpeed: 1.5
   _extinctTime: 0.4
   _extinctDelay: 1
+  _appearTime: 0.2
   _needFadeByFirstPress: 0
 --- !u!64 &5456771075596727287
 MeshCollider:
