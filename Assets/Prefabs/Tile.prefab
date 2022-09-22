@@ -156,6 +156,8 @@ MonoBehaviour:
   _extinctDelay: 1
   _appearTime: 0.2
   _needFadeByFirstPress: 0
+  _defaultMaterial: {fileID: 2100000, guid: ae55e2d7a3eb9f74f82f31a80d74215b, type: 2}
+  _dissolveMaterial: {fileID: 2100000, guid: cf5d742b53e6ed444a35fa81a776f28b, type: 2}
 --- !u!64 &5456771075596727287
 MeshCollider:
   m_ObjectHideFlags: 0

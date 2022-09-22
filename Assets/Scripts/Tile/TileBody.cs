@@ -12,6 +12,8 @@ namespace GlassIsland
         [SerializeField] private TileButton _tileButton;
         [SerializeField] private Dissolvable _dissolvingBody;
         [SerializeField] private List<Dissolvable> _dissolvableItems;
+
+        [Space(30)]
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _downSpeed;
         [SerializeField] private float _upSpeed;
@@ -20,6 +22,10 @@ namespace GlassIsland
         [SerializeField] private float _appearTime;
         [SerializeField] private bool _needFadeByFirstPress;
 
+        [Space(30)]
+        [SerializeField] private Material _defaultMaterial;
+        [SerializeField] private Material _dissolveMaterial;
+
         private Vector3 _idlePosition;
         private Vector3 _pressedPosition;
         private Vector3 _targetPosition;
@@ -27,6 +33,8 @@ namespace GlassIsland
         private float _timer;
         private bool _needAppearing;
         private bool _needDissolving;
+
+        private Renderer _renderer;
 
         public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
@@ -51,6 +59,7 @@ namespace GlassIsland
             _idlePosition = transform.position;
             _pressedPosition = _idlePosition + _shift;
             _targetPosition = _idlePosition;
+            _renderer = _dissolvingBody.GetComponent<Renderer>();
         }
 
         private void Update()
@@ -104,6 +113,7 @@ namespace GlassIsland
 
             _timer += Time.deltaTime;
             _dissolvingBody.SetAlpha(_timer / _appearTime);
+            _renderer.material = _defaultMaterial;
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
@@ -115,6 +125,7 @@ namespace GlassIsland
         {
             _timer -= Time.deltaTime;
             _dissolvingBody.SetAlpha(_timer / _extinctTime);
+            _renderer.material = _dissolveMaterial;
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
