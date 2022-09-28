@@ -7,6 +7,7 @@ namespace GlassIsland
     {
         private const float GroundDistance = 0.15f;
         private const float GroundPinForce = -2f;
+        private const float JumpConstant = -2f;
 
         private const float IdleAnimatorSpeed = 1;
         private const float MaxDirectionVectorLength = 1.41f;
@@ -28,7 +29,7 @@ namespace GlassIsland
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            _jumpVelocity = Mathf.Sqrt(_jumpHeight * -2f * (Physics.gravity.y * _gravityScale));
+            _jumpVelocity = Mathf.Sqrt(_jumpHeight * JumpConstant * (Physics.gravity.y * _gravityScale));
             _isJumped = true;
         }
 

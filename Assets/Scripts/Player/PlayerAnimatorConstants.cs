@@ -1,5 +1,7 @@
+using UnityEngine;
+
 public static class PlayerAnimatorConstants
 {
-    public const string RunningAnimation = "IsRunning";
-    public const string JumpAnimation = "Jump";
+    public static readonly int RunningAnimation = Animator.StringToHash("IsRunning");
+    public static readonly int JumpAnimation = Animator.StringToHash("Jump");
 }
