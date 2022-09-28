@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2756395704885869552}
   - component: {fileID: 118316263485378362}
   - component: {fileID: 5553808650222982345}
+  - component: {fileID: 2479327418370121325}
   m_Layer: 0
   m_Name: Dissolvable Body
   m_TagString: Untagged
@@ -98,6 +99,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _renderers:
   - {fileID: 118316263485378362}
+--- !u!114 &2479327418370121325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919840159266582255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b39a7dde79e144eb7953d34d00776f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tileBody: {fileID: 3312049968117680428}
+  _shift: {x: 0, y: -0.125, z: 0}
+  _downSpeed: 0.8
+  _upSpeed: 1.5
 --- !u!1 &5155408403862259318
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,9 +166,6 @@ MonoBehaviour:
   _dissolvableItems:
   - {fileID: 7554679742825717429}
   - {fileID: 2339743075262039408}
-  _shift: {x: 0, y: -0.125, z: 0}
-  _downSpeed: 0.8
-  _upSpeed: 1.5
   _extinctTime: 0.4
   _extinctDelay: 1
   _appearTime: 0.2

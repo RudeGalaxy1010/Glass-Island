@@ -8,23 +8,20 @@ namespace GlassIsland
     public class TileBody : MonoBehaviour
     {
         public event UnityAction Dissolved;
+        public event UnityAction Pressed;
+        public event UnityAction Unpressed;
 
         [SerializeField] private TileButton _tileButton;
         [SerializeField] private Dissolvable _dissolvingBody;
         [SerializeField] private List<Dissolvable> _dissolvableItems;
-        [SerializeField] private Vector3 _shift;
-        [SerializeField] private float _downSpeed;
-        [SerializeField] private float _upSpeed;
+        
         [SerializeField] private float _extinctTime;
         [SerializeField] private float _extinctDelay;
         [SerializeField] private float _appearTime;
         [SerializeField] private bool _needFadeByFirstPress;
 
-        private Vector3 _idlePosition;
-        private Vector3 _pressedPosition;
-        private Vector3 _targetPosition;
-
         private float _timer;
+        private float _halfExtinctTime;
         private bool _needAppearing;
         private bool _needDissolving;
 
@@ -48,9 +45,7 @@ namespace GlassIsland
 
         private void Start()
         {
-            _idlePosition = transform.position;
-            _pressedPosition = _idlePosition + _shift;
-            _targetPosition = _idlePosition;
+            _halfExtinctTime = _extinctTime / 2f;
         }
 
         private void Update()
@@ -63,15 +58,18 @@ namespace GlassIsland
             {
                 Dissolve();
             }
-
-            Move();
         }
+
+        private float _appearAlphaValue => _timer / _appearTime;
+        private float _dissolveAlphaValue => _timer / _extinctTime;
+        private bool _isAppearTimerFinished => _timer / _appearTime > 1;
+        private bool _isDissolveTimerFinished => _timer < -_halfExtinctTime;
 
         public void Press(Character character)
         {
-            _targetPosition = _pressedPosition;
+            Pressed?.Invoke();
 
-            if ((IsDissolved || _needDissolving) && character.TrySubtractBrick())
+            if ((IsDissolved || _needDissolving) && character.TrySubtractBrick() == true)
             {
                 gameObject.SetActive(true);
                 _dissolvingBody.gameObject.SetActive(true);
@@ -86,42 +84,44 @@ namespace GlassIsland
             }
 
             _needDissolving = true;
-            _timer = _extinctTime / 2f + _extinctDelay;
+            _timer = _halfExtinctTime + _extinctDelay;
         }
 
         public void Unpress()
         {
-            _targetPosition = _idlePosition;
+            Unpressed?.Invoke();
         }
 
         private void Appear()
         {
-            if (_timer / _appearTime > 1)
+            if (_isAppearTimerFinished == true)
             {
                 _needAppearing = false;
                 return;
             }
 
             _timer += Time.deltaTime;
-            _dissolvingBody.SetAlpha(_timer / _appearTime);
+            _dissolvingBody.SetAlpha(_appearAlphaValue);
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
-                dissolvingItem.SetAlpha(_timer / _appearTime);
+                dissolvingItem.SetAlpha(_appearAlphaValue);
             }
+
+            Pressed?.Invoke();
         }
 
         private void Dissolve()
         {
             _timer -= Time.deltaTime;
-            _dissolvingBody.SetAlpha(_timer / _extinctTime);
+            _dissolvingBody.SetAlpha(_dissolveAlphaValue);
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
-                dissolvingItem.SetAlpha(_timer / _extinctTime);
+                dissolvingItem.SetAlpha(_dissolveAlphaValue);
             }
 
-            if (_timer <= -_extinctTime)
+            if (_isDissolveTimerFinished == true)
             {
                 FinishDissolving();
             }
@@ -146,16 +146,6 @@ namespace GlassIsland
             gameObject.SetActive(false);
             _needDissolving = false;
             Dissolved?.Invoke();
-        }
-
-        private void Move()
-        {
-            float speed = _targetPosition == _pressedPosition ? _downSpeed : _upSpeed;
-
-            if (_dissolvingBody.transform.position != _targetPosition)
-            {
-                _dissolvingBody.transform.position = Vector3.MoveTowards(_dissolvingBody.transform.position, _targetPosition, speed * Time.deltaTime);
-            }
         }
 
         private void RemoveCollectable(Dissolvable dissolvable)
