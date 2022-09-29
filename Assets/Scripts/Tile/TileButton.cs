@@ -1,15 +1,19 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     [RequireComponent(typeof(Collider))]
     public class TileButton : MonoBehaviour
     {
+        public UnityAction<Character> Pressed;
+        public UnityAction Unpressed;
+
         private const int CoinValue = 5;
         private const int SingleBrickValue = 1;
         private const int BrickStackValue = 5;
 
-        [SerializeField] private TileBody _body;
+        [SerializeField] private TileDissolve _body;
         [SerializeField] private BrickStack _bricks;
         [SerializeField] private Coin _coin;
 
@@ -73,13 +77,13 @@ namespace GlassIsland
             }
 
             _isPressed = true;
-            _body.Press(character);
+            _body.OnPress(character);
         }
 
         private void Unpress()
         {
             _isPressed = false;
-            _body.Unpress();
+            Unpressed?.Invoke();
         }
 
         private void ClearCell()

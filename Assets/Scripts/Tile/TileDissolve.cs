@@ -1,31 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace GlassIsland
 {
     [RequireComponent(typeof(Collider))]
-    public class TileBody : MonoBehaviour
+    public class TileDissolve : MonoBehaviour
     {
-        public event UnityAction Dissolved;
-        public event UnityAction Pressed;
-        public event UnityAction Unpressed;
-
-        [SerializeField] private TileButton _tileButton;
         [SerializeField] private Dissolvable _dissolvingBody;
         [SerializeField] private List<Dissolvable> _dissolvableItems;
-        
-        [SerializeField] private float _extinctTime;
-        [SerializeField] private float _extinctDelay;
+
+        [SerializeField] private float _dissolveTime;
+        [SerializeField] private float _dissolveDelay;
         [SerializeField] private float _appearTime;
         [SerializeField] private bool _needFadeByFirstPress;
 
         private float _timer;
-        private float _halfExtinctTime;
+        private float _halfDissolveTime;
         private bool _needAppearing;
         private bool _needDissolving;
-
-        public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
 
         private void OnEnable()
         {
@@ -45,7 +37,7 @@ namespace GlassIsland
 
         private void Start()
         {
-            _halfExtinctTime = _extinctTime / 2f;
+            _halfDissolveTime = _dissolveTime / 2f;
         }
 
         private void Update()
@@ -60,15 +52,14 @@ namespace GlassIsland
             }
         }
 
+        public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
         private float _appearAlphaValue => _timer / _appearTime;
-        private float _dissolveAlphaValue => _timer / _extinctTime;
+        private float _dissolveAlphaValue => _timer / _dissolveTime;
         private bool _isAppearTimerFinished => _timer / _appearTime > 1;
-        private bool _isDissolveTimerFinished => _timer < -_halfExtinctTime;
+        private bool _isDissolveTimerFinished => _timer < -_halfDissolveTime;
 
-        public void Press(Character character)
+        public void OnPress(Character character)
         {
-            Pressed?.Invoke();
-
             if ((IsDissolved || _needDissolving) && character.TrySubtractBrick() == true)
             {
                 gameObject.SetActive(true);
@@ -84,12 +75,7 @@ namespace GlassIsland
             }
 
             _needDissolving = true;
-            _timer = _halfExtinctTime + _extinctDelay;
-        }
-
-        public void Unpress()
-        {
-            Unpressed?.Invoke();
+            _timer = _halfDissolveTime + _dissolveDelay;
         }
 
         private void Appear()
@@ -107,8 +93,6 @@ namespace GlassIsland
             {
                 dissolvingItem.SetAlpha(_appearAlphaValue);
             }
-
-            Pressed?.Invoke();
         }
 
         private void Dissolve()
@@ -145,7 +129,6 @@ namespace GlassIsland
             _dissolvingBody.FinishDissolving();
             gameObject.SetActive(false);
             _needDissolving = false;
-            Dissolved?.Invoke();
         }
 
         private void RemoveCollectable(Dissolvable dissolvable)

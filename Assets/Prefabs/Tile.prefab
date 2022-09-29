@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21b39a7dde79e144eb7953d34d00776f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileBody: {fileID: 3312049968117680428}
+  _tileButton: {fileID: -6498308853732425845}
   _shift: {x: 0, y: -0.125, z: 0}
   _downSpeed: 0.8
   _upSpeed: 1.5
@@ -166,8 +166,8 @@ MonoBehaviour:
   _dissolvableItems:
   - {fileID: 7554679742825717429}
   - {fileID: 2339743075262039408}
-  _extinctTime: 0.4
-  _extinctDelay: 1
+  _dissolveTime: 0.4
+  _dissolveDelay: 1
   _appearTime: 0.2
   _needFadeByFirstPress: 0
 --- !u!64 &5456771075596727287
