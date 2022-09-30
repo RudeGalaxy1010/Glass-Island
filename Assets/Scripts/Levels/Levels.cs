@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LevelsData", menuName = "Levels", order = 0)]
-public class Levels : ScriptableObject
+namespace GlassIsland
 {
-    public List<Level> List;
-}
+    [CreateAssetMenu(fileName = "LevelsData", menuName = "Custom/Levels", order = 0)]
+    public class Levels : ScriptableObject
+    {
+        public List<Level> List;
+    }
 
-[Serializable]
-public class Level
-{
-    public GameObject MapPrefab;
-    public float SpawnHeight;
-    public float MinDieHeight;
+    [Serializable]
+    public class Level
+    {
+        public GameObject MapPrefab;
+        public float SpawnHeight;
+        public float MinDieHeight;
+    }
 }

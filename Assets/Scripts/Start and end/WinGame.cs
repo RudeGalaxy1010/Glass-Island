@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     public class WinGame : MonoBehaviour
     {
+        public event UnityAction Won;
+
         [SerializeField] private GameObject _winPanel;
         [SerializeField] private Player _player;
         [SerializeField] private Move _playerMove;
@@ -49,6 +52,7 @@ namespace GlassIsland
                 bot.DisableOutline();
             }
 
+            Won?.Invoke();
             _winPanel.SetActive(true);
         }
     }

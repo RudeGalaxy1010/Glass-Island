@@ -1,17 +1,20 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(LevelManager))]
-public class LevelManagerInspector : Editor
+namespace GlassIsland
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(LevelManager))]
+    public class LevelManagerInspector : Editor
     {
-        DrawDefaultInspector();
-
-        if (GUILayout.Button("Reset progress"))
+        public override void OnInspectorGUI()
         {
-            ((LevelManager)target).ResetProgress();
-            Debug.Log("Progress reseted");
+            DrawDefaultInspector();
+
+            if (GUILayout.Button("Reset progress"))
+            {
+                ((LevelManager)target).ResetProgress();
+                Debug.Log("Progress reseted");
+            }
         }
     }
 }

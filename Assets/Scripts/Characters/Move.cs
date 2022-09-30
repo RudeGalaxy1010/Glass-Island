@@ -12,7 +12,7 @@ namespace GlassIsland
         private const float IdleAnimatorSpeed = 1;
         private const float MaxDirectionVectorLength = 1.41f;
 
-        [SerializeField] private float _speed;
+        [SerializeField] private PlayerProperties _playerUpgrade;
         [SerializeField] private float _jumpHeight;
         [SerializeField] private float _gravityScale;
         [SerializeField] private Animator _animator;
@@ -41,6 +41,8 @@ namespace GlassIsland
             TryJump();
             Rotate();
         }
+
+        private float Speed => _playerUpgrade.Speed;
 
         public void Enable()
         {
@@ -76,7 +78,7 @@ namespace GlassIsland
                 _animator.speed = IdleAnimatorSpeed;
             }
 
-            _controller.Move((moveDirection * _speed + Vector3.up * _verticalVelocity) * Time.deltaTime);
+            _controller.Move((moveDirection * Speed + Vector3.up * _verticalVelocity) * Time.deltaTime);
         }
 
         private void TryJump()
@@ -102,7 +104,7 @@ namespace GlassIsland
 
         private void Rotate()
         {
-            Vector3 lookDirection = _input.Velocity * _speed * Time.deltaTime;
+            Vector3 lookDirection = _input.Velocity * Speed * Time.deltaTime;
 
             if (lookDirection.magnitude > 0)
             {
