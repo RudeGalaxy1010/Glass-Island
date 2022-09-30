@@ -53,10 +53,10 @@ namespace GlassIsland
         }
 
         public bool IsDissolved => _dissolvingBody.gameObject.activeSelf == false;
-        private float _appearAlphaValue => _timer / _appearTime;
-        private float _dissolveAlphaValue => _timer / _dissolveTime;
-        private bool _isAppearTimerFinished => _timer / _appearTime > 1;
-        private bool _isDissolveTimerFinished => _timer < -_halfDissolveTime;
+        private float AppearAlphaValue => _timer / _appearTime;
+        private float DissolveAlphaValue => _timer / _dissolveTime;
+        private bool IsAppearTimerFinished => _timer / _appearTime > 1;
+        private bool IsDissolveTimerFinished => _timer < -_halfDissolveTime;
 
         public void OnPress(Character character)
         {
@@ -80,32 +80,32 @@ namespace GlassIsland
 
         private void Appear()
         {
-            if (_isAppearTimerFinished == true)
+            if (IsAppearTimerFinished == true)
             {
                 _needAppearing = false;
                 return;
             }
 
             _timer += Time.deltaTime;
-            _dissolvingBody.SetAlpha(_appearAlphaValue);
+            _dissolvingBody.SetAlpha(AppearAlphaValue);
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
-                dissolvingItem.SetAlpha(_appearAlphaValue);
+                dissolvingItem.SetAlpha(AppearAlphaValue);
             }
         }
 
         private void Dissolve()
         {
             _timer -= Time.deltaTime;
-            _dissolvingBody.SetAlpha(_dissolveAlphaValue);
+            _dissolvingBody.SetAlpha(DissolveAlphaValue);
 
             foreach (var dissolvingItem in _dissolvableItems)
             {
-                dissolvingItem.SetAlpha(_dissolveAlphaValue);
+                dissolvingItem.SetAlpha(DissolveAlphaValue);
             }
 
-            if (_isDissolveTimerFinished == true)
+            if (IsDissolveTimerFinished == true)
             {
                 FinishDissolving();
             }

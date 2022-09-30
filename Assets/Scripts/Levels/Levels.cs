@@ -12,4 +12,6 @@ public class Levels : ScriptableObject
 public class Level
 {
     public GameObject MapPrefab;
+    public float SpawnHeight;
+    public float MinDieHeight;
 }

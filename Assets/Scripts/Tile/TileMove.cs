@@ -6,7 +6,6 @@ namespace GlassIsland
     public class TileMove : MonoBehaviour
     {
         [SerializeField] private TileButton _tileButton;
-        //[SerializeField] private TileBody _tileBody;
         [SerializeField] private Vector3 _shift;
         [SerializeField] private float _downSpeed;
         [SerializeField] private float _upSpeed;
@@ -17,20 +16,12 @@ namespace GlassIsland
 
         private void OnEnable()
         {
-            //_tileBody.Pressed += OnPress;
-            //_tileBody.Unpressed += OnUnpress;
-            //_tileBody.Dissolved += OnDissolved;
-
             _tileButton.Pressed += OnPress;
             _tileButton.Unpressed += OnUnpress;
         }
 
         private void OnDisable()
         {
-            //_tileBody.Pressed -= OnPress;
-            //_tileBody.Unpressed -= OnUnpress;
-            //_tileBody.Dissolved -= OnDissolved;
-
             _tileButton.Pressed -= OnPress;
             _tileButton.Unpressed -= OnUnpress;
         }
@@ -65,11 +56,6 @@ namespace GlassIsland
         private void OnUnpress()
         {
             _targetPosition = _idlePosition;
-        }
-
-        private void OnDissolved()
-        {
-            transform.position = _idlePosition;
         }
     }
 }

@@ -5,7 +5,8 @@ namespace GlassIsland
     [RequireComponent(typeof(Character))]
     public class DieCondition : MonoBehaviour
     {
-        private const float MinHeighth = -10;
+        [SerializeField] private LevelManager _levelManager;
+
         private Character _character;
 
         private void Awake()
@@ -15,7 +16,7 @@ namespace GlassIsland
 
         private void Update()
         {
-            if (transform.position.y <= MinHeighth)
+            if (transform.position.y <= _levelManager.CurrentLevel.MinDieHeight)
             {
                 Die();
             }

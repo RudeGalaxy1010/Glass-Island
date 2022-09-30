@@ -6,6 +6,7 @@ public class LevelManager : MonoBehaviour
     private const string SaveKey = "CurrentLevel";
 
     [SerializeField] private Levels _levels;
+    [SerializeField] private Transform _backgroundTransform;
     [SerializeField] private Button _nextLevelButton;
 
     private GameObject _map;
@@ -31,6 +32,9 @@ public class LevelManager : MonoBehaviour
         _currentLevelIndex = LoadProgress();
         LoadLevel(_currentLevelIndex);
     }
+
+    public Level CurrentLevel => _levels.List[_currentLevelIndex];
+    private float BackgroundHeight => CurrentLevel.MinDieHeight - 2f;
 
     private void OnNextLevel()
     {
@@ -70,5 +74,6 @@ public class LevelManager : MonoBehaviour
         }
 
         _map = Instantiate(_levels.List[index].MapPrefab);
+        _backgroundTransform.position = new Vector3(_backgroundTransform.position.x, BackgroundHeight, _backgroundTransform.position.z);
     }
 }

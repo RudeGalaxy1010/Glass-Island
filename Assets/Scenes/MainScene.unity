@@ -1315,6 +1315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bc001d12cdae944185ff9f18aedb0b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _levelManager: {fileID: 631907606}
   _players:
   - {fileID: 687505462}
   - {fileID: 1635708661253781349}
@@ -1322,7 +1323,6 @@ MonoBehaviour:
   - {fileID: 1203618739}
   - {fileID: 867936665}
   - {fileID: 1079439145}
-  _startHeight: 5
   _radius: 2
   _startDelay: 1
 --- !u!114 &631907604
@@ -1388,6 +1388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _levels: {fileID: 11400000, guid: f4eff1bfd0db47042a3431d3e4311b1c, type: 2}
+  _backgroundTransform: {fileID: 270848213}
   _nextLevelButton: {fileID: 511819655}
 --- !u!1 &649428871
 GameObject:
@@ -1889,6 +1890,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4284474401017304745, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 4795211851231047996, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -2755,6 +2760,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4284474401017304745, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 4795211851231047996, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -2937,6 +2946,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4284474401017304745, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 6915598377333053816, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
       value: 
@@ -3718,6 +3731,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4284474401017304745, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 4795211851231047996, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -3761,6 +3778,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 29570205312560493, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 312875135375849841, guid: 6997491b3465f3a4296c50bf93d2004c, type: 3}
       propertyPath: _name
       value: Guest3775
@@ -3936,6 +3957,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4284474401017304745, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
+      propertyPath: _levelManager
+      value: 
+      objectReference: {fileID: 631907606}
     - target: {fileID: 6915598377333053816, guid: f899172d14f71aa43947fae885ffc7d0, type: 3}
       propertyPath: m_Camera
       value: 
