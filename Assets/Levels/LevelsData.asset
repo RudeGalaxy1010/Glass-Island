@@ -22,3 +22,24 @@ MonoBehaviour:
   - MapPrefab: {fileID: 5685574437517550472, guid: 512303f0c89b5dd4f8ae841d2239fc68, type: 3}
     SpawnHeight: 5
     MinDieHeight: -10
+  - MapPrefab: {fileID: 5685574437517550472, guid: 43d5f73e19dd618409fa16a86856bb4f, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -2.5
+  - MapPrefab: {fileID: 5685574437517550472, guid: ce9135d46bf3c424b81caf692af32775, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -2.5
+  - MapPrefab: {fileID: 5685574437517550472, guid: 14f6cf9d09f21d14084c83000aab91fd, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -10
+  - MapPrefab: {fileID: 5685574437517550472, guid: 5f8d2513afb778145a2091c4b6bf853c, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -20.5
+  - MapPrefab: {fileID: 5685574437517550472, guid: 85945e94d8b54bf40bc65c4816684fa1, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -13
+  - MapPrefab: {fileID: 5685574437517550472, guid: 7dc4ff22247f65a46943cc4762629a3a, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -2.5
+  - MapPrefab: {fileID: 5685574437517550472, guid: 63f718ed76221284ea63251bedc24394, type: 3}
+    SpawnHeight: 5
+    MinDieHeight: -10
