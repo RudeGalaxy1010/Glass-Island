@@ -22,6 +22,8 @@ public class Dissolvable : MonoBehaviour
         }
     }
 
+    public bool IsDissolved => !gameObject.activeSelf;
+
     public void Appear()
     {
         gameObject.SetActive(true);

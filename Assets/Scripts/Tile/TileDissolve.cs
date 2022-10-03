@@ -6,6 +6,7 @@ namespace GlassIsland
     [RequireComponent(typeof(Collider))]
     public class TileDissolve : MonoBehaviour
     {
+        [SerializeField] private TileButton _tileButton;
         [SerializeField] private Dissolvable _dissolvingBody;
         [SerializeField] private List<Dissolvable> _dissolvableItems;
 
@@ -18,6 +19,7 @@ namespace GlassIsland
         private float _halfDissolveTime;
         private bool _needAppearing;
         private bool _needDissolving;
+        private Collider _collider;
 
         private void OnEnable()
         {
@@ -25,6 +27,8 @@ namespace GlassIsland
             {
                 dissolvingCollectable.Dissolved += RemoveCollectable;
             }
+
+            _tileButton.Pressed += OnPress;
         }
 
         private void OnDisable()
@@ -33,10 +37,13 @@ namespace GlassIsland
             {
                 dissolvingCollectable.Dissolved -= RemoveCollectable;
             }
+
+            _tileButton.Pressed -= OnPress;
         }
 
         private void Start()
         {
+            _collider = GetComponent<Collider>();
             _halfDissolveTime = _dissolveTime / 2f;
         }
 
@@ -62,7 +69,7 @@ namespace GlassIsland
         {
             if ((IsDissolved || _needDissolving) && character.TrySubtractBrick() == true)
             {
-                gameObject.SetActive(true);
+                _collider.enabled = true;
                 _dissolvingBody.gameObject.SetActive(true);
                 _needAppearing = true;
                 _needDissolving = false;
@@ -127,7 +134,7 @@ namespace GlassIsland
             }
 
             _dissolvingBody.FinishDissolving();
-            gameObject.SetActive(false);
+            _collider.enabled = false;
             _needDissolving = false;
         }
 

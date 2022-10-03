@@ -9,49 +9,7 @@ namespace GlassIsland
         public UnityAction<Character> Pressed;
         public UnityAction Unpressed;
 
-        private const int CoinValue = 5;
-        private const int SingleBrickValue = 1;
-        private const int BrickStackValue = 5;
-
-        [SerializeField] private TileDissolve _body;
-        [SerializeField] private BrickStack _bricks;
-        [SerializeField] private Coin _coin;
-
-        private const float _singleBrickChance = 0.25f;
-        private const float _fiveBricksChance = 0.2f;
-        private const float _coinChance = 0.15f;
-
         private bool _isPressed;
-
-        private void Start()
-        {
-            if (_body.IsDissolved == false)
-            {
-                CreateItem();
-            }
-        }
-
-        private void CreateItem()
-        {
-            float randomValue = Random.value;
-            ClearCell();
-
-            if (randomValue <= _coinChance)
-            {
-                _coin.gameObject.SetActive(true);
-                _coin.Init(CoinValue);
-            }
-            else if (randomValue <= _coinChance + _singleBrickChance)
-            {
-                _bricks.gameObject.SetActive(true);
-                _bricks.Init(SingleBrickValue);
-            }
-            else if (randomValue <= _coinChance + _singleBrickChance + _fiveBricksChance)
-            {
-                _bricks.gameObject.SetActive(true);
-                _bricks.Init(BrickStackValue);
-            }
-        }
 
         private void OnTriggerEnter(Collider other)
         {
@@ -69,7 +27,7 @@ namespace GlassIsland
             }
         }
 
-        private void Press(Character character)
+        protected virtual void Press(Character character)
         {
             if (_isPressed == true)
             {
@@ -77,19 +35,13 @@ namespace GlassIsland
             }
 
             _isPressed = true;
-            _body.OnPress(character);
+            Pressed?.Invoke(character);
         }
 
-        private void Unpress()
+        protected virtual void Unpress()
         {
             _isPressed = false;
             Unpressed?.Invoke();
-        }
-
-        private void ClearCell()
-        {
-            _bricks.gameObject.SetActive(false);
-            _coin.gameObject.SetActive(false);
         }
     }
 }

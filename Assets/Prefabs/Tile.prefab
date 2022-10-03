@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21b39a7dde79e144eb7953d34d00776f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileButton: {fileID: -6498308853732425845}
+  _tileButton: {fileID: 1376505379924570911}
   _shift: {x: 0, y: -0.125, z: 0}
   _downSpeed: 0.8
   _upSpeed: 1.5
@@ -161,7 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bcef2d138d555948990a60bbdbd5f7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileButton: {fileID: -6498308853732425845}
+  _tileButton: {fileID: 1376505379924570911}
   _dissolvingBody: {fileID: 5553808650222982345}
   _dissolvableItems:
   - {fileID: 7554679742825717429}
@@ -193,7 +193,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6270958449999909099}
-  - component: {fileID: -6498308853732425845}
+  - component: {fileID: 1376505379924570911}
   - component: {fileID: 6262403046558089351}
   m_Layer: 0
   m_Name: Tile
@@ -220,7 +220,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-6498308853732425845
+--- !u!114 &1376505379924570911
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -229,10 +229,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6270958449999909098}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94a7cbc6a861f2f43bdf8f3e85505f5f, type: 3}
+  m_Script: {fileID: 11500000, guid: a2afc638c8396a64985fa7d78b6f89a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _body: {fileID: 3312049968117680428}
+  _body: {fileID: 5553808650222982345}
   _bricks: {fileID: 2339743075262039408}
   _coin: {fileID: 7554679742825717429}
 --- !u!135 &6262403046558089351
@@ -246,7 +246,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.45
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &393229884814393102
 PrefabInstance:

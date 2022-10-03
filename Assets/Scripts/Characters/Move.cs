@@ -29,7 +29,7 @@ namespace GlassIsland
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            _jumpVelocity = Mathf.Sqrt(_jumpHeight * JumpConstant * (Physics.gravity.y * _gravityScale));
+            _jumpVelocity = GetJumpVelovity(_jumpHeight);
             _isJumped = true;
         }
 
@@ -43,6 +43,7 @@ namespace GlassIsland
         }
 
         private float Speed => _playerUpgrade.Speed;
+        private float GetJumpVelovity(float height) => Mathf.Sqrt(height * JumpConstant * (Physics.gravity.y * _gravityScale));
 
         public void Enable()
         {
@@ -56,6 +57,14 @@ namespace GlassIsland
             _controller.enabled = false;
             ResetAnimator();
             enabled = false;
+        }
+
+        public void Jump(float height)
+        {
+            float velocity = GetJumpVelovity(height);
+            _animator.SetTrigger(PlayerAnimatorConstants.JumpAnimation);
+            _verticalVelocity = velocity;
+            _isJumped = true;
         }
 
         private void ResetAnimator()
@@ -83,14 +92,14 @@ namespace GlassIsland
 
         private void TryJump()
         {
-            if (_isGrounded == true)
+            if (_isJumped == true)
             {
-                _isJumped = false;
                 return;
             }
 
-            if (_isJumped == true)
+            if (_isGrounded == true)
             {
+                _isJumped = false;
                 return;
             }
 

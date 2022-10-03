@@ -18,4 +18,7 @@ MonoBehaviour:
     MinDieHeight: -2.5
   - MapPrefab: {fileID: 5685574437517550472, guid: c15cf5421d853704ba95e7e2eed63683, type: 3}
     SpawnHeight: 5
+    MinDieHeight: -2.5
+  - MapPrefab: {fileID: 5685574437517550472, guid: 512303f0c89b5dd4f8ae841d2239fc68, type: 3}
+    SpawnHeight: 5
     MinDieHeight: -10
