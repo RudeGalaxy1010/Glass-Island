@@ -9,7 +9,7 @@ namespace GlassIsland
         [SerializeField] private WinGame _winGame;
         [SerializeField] private Player _player;
 
-        private int _money;
+        private int _balance;
 
         private void OnEnable()
         {
@@ -25,11 +25,13 @@ namespace GlassIsland
         {
             if (PlayerPrefs.HasKey(SaveKey) == false)
             {
-                SaveMoney(_money);
+                SaveMoney(_balance);
             }
 
-            _money = LoadMoney();
+            _balance = LoadMoney();
         }
+
+        public int Balance => _balance;
 
         private void UpdateMoney()
         {
@@ -38,19 +40,19 @@ namespace GlassIsland
 
         public void AddMoney(int value)
         {
-            _money += value;
-            SaveMoney(_money);
+            _balance += value;
+            SaveMoney(_balance);
         }
 
         public void SubMoney(int value)
         {
-            _money -= value;
-            SaveMoney(_money);
+            _balance -= value;
+            SaveMoney(_balance);
         }
 
         public bool HasMoney(int value)
         {
-            if (_money >= value)
+            if (_balance >= value)
             {
                 return true;
             }
