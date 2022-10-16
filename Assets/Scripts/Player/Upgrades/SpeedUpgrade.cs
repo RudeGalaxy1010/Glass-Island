@@ -1,14 +1,17 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace GlassIsland
 {
-    public class UpgradePanel : MonoBehaviour
+    public class SpeedUpgrade : MonoBehaviour
     {
-        [SerializeField] private TMP_Text _balanceText;
+        private const float MaxSpeed = 8;
+
+        public event UnityAction Updated;
+
         [SerializeField] private Button _upgradeSpeedButton;
-        [SerializeField] private Button _unlockNextHatButton;
         [SerializeField] private TMP_Text _upgradeSpeedCostText;
         [SerializeField] private PlayerProperties _playerProperties;
         [SerializeField] private Money _money;
@@ -25,19 +28,18 @@ namespace GlassIsland
 
         private void Start()
         {
-            UpdateBalanceText();
-            UpdateUpgradeButton();
+            UpdateSpeedUpgrade();
         }
 
-        private void UpdateBalanceText()
-        {
-            _balanceText.text = _money.Balance.ToString();
-        }
-
-        private void UpdateUpgradeButton()
+        private void UpdateSpeedUpgrade()
         {
             _upgradeSpeedCostText.text = _playerProperties.SpeedCost.ToString();
             _upgradeSpeedButton.interactable = false;
+
+            if (_playerProperties.Speed >= MaxSpeed)
+            {
+                return;
+            }
 
             if (_money.HasMoney(_playerProperties.SpeedCost))
             {
@@ -49,8 +51,8 @@ namespace GlassIsland
         {
             _money.SubMoney(_playerProperties.SpeedCost);
             _playerProperties.UpgradeSpeed();
-            UpdateUpgradeButton();
-            UpdateBalanceText();
+            UpdateSpeedUpgrade();
+            Updated?.Invoke();
         }
     }
 }

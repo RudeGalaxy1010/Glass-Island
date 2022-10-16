@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19adbcfc6e633a448a86b56bf256afe5, type: 3}
+  m_Name: Pillbox Hat
+  m_EditorClassIdentifier: 
+  Id: 6
+  Sprite: {fileID: 21300000, guid: 51526ab05620ce84f96c996f770323a2, type: 3}
+  Prefab: {fileID: 100000, guid: 565e3543feaac1b408a41f8c0d67febd, type: 3}
+  Cost: 220
+  IsUnlocked: 0

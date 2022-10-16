@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GlassIsland
 {
-    public class Hats : MonoBehaviour
+    public class BotHats : MonoBehaviour
     {
         [Range(0, 1)]
         [SerializeField] private float _hatChance;
@@ -15,7 +15,7 @@ namespace GlassIsland
 
         private void PickRandomHat()
         {
-            if (Random.value > _hatChance)
+            if (Random.value <= _hatChance)
             {
                 return;
             }

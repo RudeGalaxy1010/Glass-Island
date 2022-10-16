@@ -2960,7 +2960,6 @@ GameObject:
   - component: {fileID: 3559663130951109326}
   - component: {fileID: 4284474401017304745}
   - component: {fileID: 3559663130372318422}
-  - component: {fileID: 6596979581844655605}
   m_Layer: 0
   m_Name: Bot
   m_TagString: Untagged
@@ -3046,7 +3045,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1f27672fd0cff147b1eadbeb515977b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 2.5
+  _playerUpgrade: {fileID: 0}
   _jumpHeight: 0.35
   _gravityScale: 1
   _animator: {fileID: 4795211851226894332}
@@ -3082,6 +3081,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f253e48333b47fe42b11dbf86b668754, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _levelManager: {fileID: 0}
 --- !u!114 &3559663130372318422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5190,20 +5190,6 @@ MonoBehaviour:
     - {x: 0.21930844, y: 0.76865065, z: -0.6008993}
     - {x: -0.19639388, y: 0.62977713, z: -0.7515385}
     - {x: -0.21762651, y: 0.7685431, z: -0.6016479}
---- !u!114 &6596979581844655605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3833118016024114111}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 138c35d9bbad26a42b91bf820124056a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _hatChance: 0
-  _hats: []
 --- !u!1 &4795211851234163744
 GameObject:
   m_ObjectHideFlags: 0

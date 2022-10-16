@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace GlassIsland
@@ -33,11 +34,6 @@ namespace GlassIsland
 
         public int Balance => _balance;
 
-        private void UpdateMoney()
-        {
-            AddMoney(_player.Score);
-        }
-
         public void AddMoney(int value)
         {
             _balance += value;
@@ -58,6 +54,16 @@ namespace GlassIsland
             }
 
             return false;
+        }
+
+        public void ResetBalance()
+        {
+            PlayerPrefs.DeleteKey(SaveKey);
+        }
+
+        private void UpdateMoney()
+        {
+            AddMoney(_player.Score);
         }
 
         private void SaveMoney(int value)
