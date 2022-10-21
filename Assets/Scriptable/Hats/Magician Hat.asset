@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Magician Hat
   m_EditorClassIdentifier: 
   Id: 3
-  Sprite: {fileID: 21300000, guid: 64a9755c482150442922b8df135ba8f5, type: 3}
+  Sprite: {fileID: 1819523261, guid: 87e5a2b13d3f82545b782b43899272d1, type: 3}
   Prefab: {fileID: 100000, guid: 06c4131835f65024586454416f6b1f66, type: 3}
   Cost: 140
   IsUnlocked: 0

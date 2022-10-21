@@ -9,7 +9,7 @@ namespace GlassIsland.UI
     {
         public event UnityAction<HatButton> Clicked;
 
-        [SerializeField] private GameObject _border;
+        [SerializeField] private GameObject _checkmark;
         [SerializeField] private Image _image;
         [SerializeField] private GameObject _lock;
 
@@ -43,12 +43,12 @@ namespace GlassIsland.UI
 
         public void SetSelectection()
         {
-            _border.SetActive(true);
+            _checkmark.SetActive(true);
         }
 
         public void ResetSelection()
         {
-            _border.SetActive(false);
+            _checkmark.SetActive(false);
         }
 
         private void OnClick()

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Police Hat
   m_EditorClassIdentifier: 
   Id: 7
-  Sprite: {fileID: 21300000, guid: f0e1e2a3933107f4986b8302eb29f020, type: 3}
+  Sprite: {fileID: -1238437177, guid: 87e5a2b13d3f82545b782b43899272d1, type: 3}
   Prefab: {fileID: 100000, guid: cf015317a103ab34483db3f2dc6f0f59, type: 3}
   Cost: 240
   IsUnlocked: 0

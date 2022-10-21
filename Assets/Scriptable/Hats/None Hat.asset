@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: None Hat
   m_EditorClassIdentifier: 
   Id: 0
-  Sprite: {fileID: 21300000, guid: a2f799f1413be504ea1ac3cb24e32379, type: 3}
+  Sprite: {fileID: -857335391, guid: 87e5a2b13d3f82545b782b43899272d1, type: 3}
   Prefab: {fileID: 0}
   Cost: 0
   IsUnlocked: 1

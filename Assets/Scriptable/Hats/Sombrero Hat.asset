@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sombrero Hat
   m_EditorClassIdentifier: 
   Id: 9
-  Sprite: {fileID: 21300000, guid: c2455d472d37fff4789297cddb371dfc, type: 3}
+  Sprite: {fileID: 1254603649, guid: 87e5a2b13d3f82545b782b43899272d1, type: 3}
   Prefab: {fileID: 100000, guid: 290f57b34312fbf448d3b8ca6b6bd41d, type: 3}
   Cost: 280
   IsUnlocked: 0

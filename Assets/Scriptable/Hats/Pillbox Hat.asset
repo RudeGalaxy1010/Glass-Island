@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pillbox Hat
   m_EditorClassIdentifier: 
   Id: 6
-  Sprite: {fileID: 21300000, guid: 51526ab05620ce84f96c996f770323a2, type: 3}
+  Sprite: {fileID: 1137033929, guid: 87e5a2b13d3f82545b782b43899272d1, type: 3}
   Prefab: {fileID: 100000, guid: 565e3543feaac1b408a41f8c0d67febd, type: 3}
   Cost: 220
   IsUnlocked: 0
