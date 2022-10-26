@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -6,6 +7,7 @@ namespace GlassIsland.UI
 {
     public class UnlockHatPanel : MonoBehaviour
     {
+        public const string Question = "Do you want to unlock this hat for {0}?";
         public event UnityAction HatUlocked;
 
         [SerializeField] private Image _hatImage;
@@ -13,6 +15,7 @@ namespace GlassIsland.UI
         [SerializeField] private Button _declineButton;
         [SerializeField] private HatProperties _hatProperties;
         [SerializeField] private Money _money;
+        [SerializeField] private TMP_Text _questionText;
 
         private Hat _hat;
 
@@ -32,6 +35,7 @@ namespace GlassIsland.UI
         {
             _hat = hat;
             _hatImage.sprite = _hat.Sprite;
+            _questionText.text = Question.Replace("{0}", _hat.Cost.ToString());
         }
 
         private void OnApproveButtonClicked()

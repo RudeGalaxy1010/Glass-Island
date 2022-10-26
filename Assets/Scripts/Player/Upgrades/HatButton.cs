@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ namespace GlassIsland.UI
         [SerializeField] private GameObject _checkmark;
         [SerializeField] private Image _image;
         [SerializeField] private GameObject _lock;
+        [SerializeField] private TMP_Text _costText;
 
         private Button _button;
         private Hat _hat;
@@ -35,6 +37,15 @@ namespace GlassIsland.UI
         {
             _hat = hat;
             _image.sprite = hat.Sprite;
+            
+            if (_hat.IsUnlocked == false)
+            {
+                _costText.text = _hat.Cost.ToString();
+            }
+            else
+            {
+                _costText.gameObject.SetActive(false);
+            }
 
             _lock.SetActive(!_hat.IsUnlocked);
         }

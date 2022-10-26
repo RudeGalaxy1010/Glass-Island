@@ -26,7 +26,7 @@ namespace GlassIsland
         {
             if (PlayerPrefs.HasKey(SaveKey) == false)
             {
-                SaveMoney(_balance);
+                SaveMoney(10000);
             }
 
             _balance = LoadMoney();
