@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace GlassIsland
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(HatProperties))]
     public class PlayerHatsInspector : Editor
     {
@@ -17,4 +18,5 @@ namespace GlassIsland
             }
         }
     }
+#endif
 }

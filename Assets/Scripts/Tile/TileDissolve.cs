@@ -45,6 +45,11 @@ namespace GlassIsland
         {
             _collider = GetComponent<Collider>();
             _halfDissolveTime = _dissolveTime / 2f;
+
+            if (IsDissolved)
+            {
+                FinishDissolving();
+            }
         }
 
         private void Update()
@@ -67,8 +72,13 @@ namespace GlassIsland
 
         public void OnPress(Character character)
         {
-            if ((IsDissolved || _needDissolving) && character.TrySubtractBrick() == true)
+            if (IsDissolved || _needDissolving)
             {
+                if (character.TrySubtractBrick() == false)
+                {
+                    return;
+                }
+
                 _collider.enabled = true;
                 _dissolvingBody.gameObject.SetActive(true);
                 _needAppearing = true;

@@ -7,6 +7,7 @@ namespace GlassIsland
     {
         public float Speed = 2.5f;
         public int SpeedCost = 25;
+        public float MaxSpeed = 3f;
 
         [SerializeField] private float _speedUpgradeStep = 0.1f;
         [SerializeField] private int _speedCostStep = 5;

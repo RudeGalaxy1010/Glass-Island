@@ -7,7 +7,7 @@ namespace GlassIsland
 {
     public class SpeedUpgrade : MonoBehaviour
     {
-        private const float MaxSpeed = 8;
+        private const string MaxText = "Max";
 
         public event UnityAction Updated;
 
@@ -36,8 +36,9 @@ namespace GlassIsland
             _upgradeSpeedCostText.text = _playerProperties.SpeedCost.ToString();
             _upgradeSpeedButton.interactable = false;
 
-            if (_playerProperties.Speed >= MaxSpeed)
+            if (_playerProperties.Speed >= _playerProperties.MaxSpeed)
             {
+                _upgradeSpeedCostText.text = MaxText;
                 return;
             }
 

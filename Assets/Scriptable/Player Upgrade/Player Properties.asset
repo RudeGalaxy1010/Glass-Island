@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Speed: 2.5
   SpeedCost: 25
+  MaxSpeed: 3
   _speedUpgradeStep: 0.1
   _speedCostStep: 5
