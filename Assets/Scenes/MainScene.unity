@@ -2107,6 +2107,7 @@ MonoBehaviour:
   - {fileID: 1079439145}
   _radius: 2
   _startDelay: 1
+  _tilePrefab: {fileID: 4929833612162928762, guid: c7f2bdba32fa5fa4a99905c7b08ad3e1, type: 3}
 --- !u!114 &631907604
 MonoBehaviour:
   m_ObjectHideFlags: 0

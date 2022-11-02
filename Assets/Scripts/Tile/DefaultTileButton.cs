@@ -46,7 +46,7 @@ namespace GlassIsland
             }
         }
 
-        private void ClearTile()
+        public override void ClearTile()
         {
             _bricks.gameObject.SetActive(false);
             _coin.gameObject.SetActive(false);

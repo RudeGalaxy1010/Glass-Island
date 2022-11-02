@@ -11,6 +11,7 @@ namespace GlassIsland
         [SerializeField] Move[] _players;
         [SerializeField] private float _radius;
         [SerializeField] private float _startDelay;
+        [SerializeField] private TileButton _tilePrefab;
 
         private float _objectsCounter;
 
@@ -23,6 +24,8 @@ namespace GlassIsland
             {
                 player.Disable();
                 player.transform.position = GetRandomPosition();
+                TileButton tile = Instantiate(_tilePrefab, player.transform.position + Vector3.down, Quaternion.identity);
+                tile.ClearTile();
             }
 
             yield return new WaitForSeconds(_startDelay);

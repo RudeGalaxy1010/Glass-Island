@@ -27,6 +27,8 @@ namespace GlassIsland
             }
         }
 
+        public virtual void ClearTile() { }
+
         protected virtual void Press(Character character)
         {
             if (_isPressed == true)
