@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     public class LoseGame : MonoBehaviour
     {
+        public event UnityAction Lost;
+
         [SerializeField] private GameObject _losePanel;
         [SerializeField] private Player _player;
         [SerializeField] private List<Character> _bots;
@@ -58,6 +61,7 @@ namespace GlassIsland
             _smoothFollow.SetDefaultTarget();
             _joystick.SetActive(false);
             _losePanel.SetActive(true);
+            Lost?.Invoke();
         }
     }
 }

@@ -18,9 +18,10 @@ namespace GlassIsland
 
         private int _score;
         private int _bricksCount;
+        private bool _isDead;
 
         public Transform LastBrickPoint => _bricksTargetPoint;
-        public int Score => _score;
+        public int Score => _score + (_isDead ? 10 : 25);
 
         private void Start()
         {
@@ -68,8 +69,9 @@ namespace GlassIsland
 
         public void Die()
         {
-            Died?.Invoke(this);
             gameObject.SetActive(false);
+            _isDead = true;
+            Died?.Invoke(this);
         }
 
         public void DisableOutline()

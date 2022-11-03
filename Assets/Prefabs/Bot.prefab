@@ -3067,7 +3067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _limitsX: {x: -4, y: 5}
-  _limitsZ: {x: -1.25, y: 6.75}
+  _limitsZ: {x: -4, y: 0}
   _stackProcessTime: 1
 --- !u!114 &4284474401017304745
 MonoBehaviour:

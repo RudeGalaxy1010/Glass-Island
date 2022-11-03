@@ -26,6 +26,7 @@ namespace GlassIsland
                 player.transform.position = GetRandomPosition();
                 TileButton tile = Instantiate(_tilePrefab, player.transform.position + Vector3.down, Quaternion.identity);
                 tile.ClearTile();
+                tile.Pressed += (c) => Destroy(tile.gameObject, 3f);
             }
 
             yield return new WaitForSeconds(_startDelay);

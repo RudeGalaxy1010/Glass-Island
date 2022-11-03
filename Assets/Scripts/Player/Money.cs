@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace GlassIsland
@@ -8,18 +7,21 @@ namespace GlassIsland
         private const string SaveKey = "Money";
 
         [SerializeField] private WinGame _winGame;
+        [SerializeField] private LoseGame _loseGame;
         [SerializeField] private Player _player;
 
         private int _balance;
 
         private void OnEnable()
         {
-            _winGame.Won += UpdateMoney;
+            _winGame.Won += OnGameWon;
+            _loseGame.Lost += OnGameLost;
         }
 
         private void OnDisable()
         {
-            _winGame.Won -= UpdateMoney;
+            _winGame.Won -= OnGameWon;
+            _loseGame.Lost -= OnGameLost;
         }
 
         private void Start()
@@ -61,7 +63,17 @@ namespace GlassIsland
             PlayerPrefs.DeleteKey(SaveKey);
         }
 
-        private void UpdateMoney()
+        private void OnGameWon()
+        {
+            AddMoneyFromScore();
+        }
+
+        private void OnGameLost()
+        {
+            AddMoneyFromScore();
+        }
+
+        private void AddMoneyFromScore()
         {
             AddMoney(_player.Score);
         }
