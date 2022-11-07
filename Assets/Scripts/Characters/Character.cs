@@ -74,6 +74,11 @@ namespace GlassIsland
             Died?.Invoke(this);
         }
 
+        public void EnableOutline()
+        {
+            _outline.enabled = true;
+        }
+
         public void DisableOutline()
         {
             _outline.enabled = false;

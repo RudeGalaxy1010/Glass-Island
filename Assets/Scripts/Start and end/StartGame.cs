@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GlassIsland
 {
@@ -12,24 +13,49 @@ namespace GlassIsland
         [SerializeField] private float _radius;
         [SerializeField] private float _startDelay;
         [SerializeField] private TileButton _tilePrefab;
+        [SerializeField] private Button _startButton;
 
         private float _objectsCounter;
 
         private float _angleOffset => _halfCircleInDegrees / _players.Length;
         private float _spawnHeight => _levelManager.CurrentLevel.SpawnHeight;
 
-        private IEnumerator Start()
+        private void OnEnable()
+        {
+            _startButton.onClick.AddListener(OnStartButtonClick);
+        }
+
+        private void OnDisable()
+        {
+            _startButton.onClick.RemoveListener(OnStartButtonClick);
+        }
+
+        private void Start()
         {
             foreach (var player in _players)
             {
+                player.GetComponent<Character>().DisableOutline();
                 player.Disable();
                 player.transform.position = GetRandomPosition();
                 TileButton tile = Instantiate(_tilePrefab, player.transform.position + Vector3.down, Quaternion.identity);
                 tile.ClearTile();
                 tile.Pressed += (c) => Destroy(tile.gameObject, 3f);
             }
+        }
 
-            yield return new WaitForSeconds(_startDelay);
+        private void OnStartButtonClick()
+        {
+            StartCoroutine(ActivatePlayers(_startDelay));
+        }
+
+        private IEnumerator ActivatePlayers(float delay)
+        {
+            foreach (var player in _players)
+            {
+                player.GetComponent<Character>().EnableOutline();
+            }
+
+            yield return new WaitForSeconds(delay);
 
             foreach (var player in _players)
             {
