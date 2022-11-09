@@ -1,10 +1,13 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GlassIsland
 {
     public class Money : MonoBehaviour
     {
         private const string SaveKey = "Money";
+
+        public event UnityAction<int> MoneyChanged;
 
         [SerializeField] private WinGame _winGame;
         [SerializeField] private LoseGame _loseGame;
@@ -32,6 +35,7 @@ namespace GlassIsland
             }
 
             _balance = LoadMoney();
+            MoneyChanged?.Invoke(Balance);
         }
 
         public int Balance => _balance;
@@ -40,12 +44,14 @@ namespace GlassIsland
         {
             _balance += value;
             SaveMoney(_balance);
+            MoneyChanged?.Invoke(Balance);
         }
 
         public void SubMoney(int value)
         {
             _balance -= value;
             SaveMoney(_balance);
+            MoneyChanged?.Invoke(Balance);
         }
 
         public bool HasMoney(int value)

@@ -5,27 +5,23 @@ namespace GlassIsland.UI
 {
     public class Balance : MonoBehaviour
     {
-        [SerializeField] private SpeedUpgrade _speedUpgrade;
-        [SerializeField] private UnlockHatPanel _unlockHatPanel;
         [SerializeField] private TMP_Text _balanceText;
         [SerializeField] private Money _money;
 
         private void OnEnable()
         {
-            _speedUpgrade.Updated += UpdateView;
-            _unlockHatPanel.HatUlocked += UpdateView;
-            UpdateView();
+            _money.MoneyChanged += OnMoneyChanged;
+            OnMoneyChanged(_money.Balance);
         }
 
         private void OnDisable()
         {
-            _speedUpgrade.Updated -= UpdateView;
-            _unlockHatPanel.HatUlocked -= UpdateView;
+            _money.MoneyChanged -= OnMoneyChanged;
         }
 
-        private void UpdateView()
+        private void OnMoneyChanged(int money)
         {
-            _balanceText.text = _money.Balance.ToString();
+            _balanceText.text = money.ToString();
         }
     }
 }

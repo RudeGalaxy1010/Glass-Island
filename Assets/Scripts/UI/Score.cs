@@ -12,6 +12,11 @@ namespace GlassIsland
 
         private void OnEnable()
         {
+            UpdateScore();
+        }
+
+        public void UpdateScore()
+        {
             StartCoroutine(UpdateScoreText(_player.Score));
         }
 
