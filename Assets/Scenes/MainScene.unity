@@ -5724,8 +5724,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42f7044488714e649948493da261b099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speedUpgrade: {fileID: 287572918}
-  _unlockHatPanel: {fileID: 1580979828}
   _balanceText: {fileID: 2143646248}
   _money: {fileID: 312875135206600229}
 --- !u!1 &1062477876
@@ -7923,8 +7921,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42f7044488714e649948493da261b099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speedUpgrade: {fileID: 287572918}
-  _unlockHatPanel: {fileID: 1580979828}
   _balanceText: {fileID: 198918097}
   _money: {fileID: 312875135206600229}
 --- !u!1 &1743966411
@@ -8842,6 +8838,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2078275254}
   - component: {fileID: 2078275253}
+  - component: {fileID: 2078275255}
   m_Layer: 0
   m_Name: ADS
   m_TagString: Untagged
@@ -8876,6 +8873,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2078275255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078275252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beda94805bef9a94b9b1485dc2b70724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _adsManager: {fileID: 2078275253}
+  _loseGame: {fileID: 631907605}
 --- !u!1 &2086074688
 GameObject:
   m_ObjectHideFlags: 0
