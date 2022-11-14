@@ -10,6 +10,7 @@ namespace GlassIsland.Localization
 {
     public class Language : MonoBehaviour
     {
+        private const string Key = "lang";
         private readonly List<string> LanguageNames = new List<string>() { "English", "Russian", "Turkish" };
 
         [SerializeField] private TMP_Dropdown _dropdown;
@@ -22,10 +23,31 @@ namespace GlassIsland.Localization
             yield break;
 #endif
 
+            if (PlayerPrefs.GetInt(Key, 0) == 1)
+            {
+                yield break;
+            }
+
             yield return new WaitUntil(() => YandexGamesSdk.IsInitialized);
 
             string language = YandexGamesSdk.Environment.i18n.lang;
-            LeanLocalization.SetCurrentLanguageAll(language);
+            int option = 0;
+
+            switch(language)
+            {
+                case "en":
+                case "En": option = 0;
+                    break;
+                case "ru":
+                case "RU": option = 1;
+                    break;
+                case "tr":
+                case "TR": option = 2;
+                    break;
+            }
+
+            SelectLanguage(option);
+            UpdateDropdown();
         }
 
         private void OnEnable()
@@ -49,6 +71,13 @@ namespace GlassIsland.Localization
         private void SelectLanguage(int option)
         {
             LeanLocalization.SetCurrentLanguageAll(LanguageNames[option]);
+            PlayerPrefs.SetInt(Key, 1);
+        }
+
+        private void UpdateDropdown()
+        {
+            _dropdown.value = LanguageNames.IndexOf(LeanLocalization.GetFirstCurrentLanguage());
+            _dropdown.RefreshShownValue();
         }
     }
 }
