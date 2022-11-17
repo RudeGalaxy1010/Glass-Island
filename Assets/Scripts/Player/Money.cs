@@ -8,6 +8,7 @@ namespace GlassIsland
         private const string SaveKey = "Money";
 
         public event UnityAction<int> MoneyChanged;
+        public event UnityAction<int> MoneyAdded;
 
         [SerializeField] private WinGame _winGame;
         [SerializeField] private LoseGame _loseGame;
@@ -45,6 +46,7 @@ namespace GlassIsland
             _balance += value;
             SaveMoney(_balance);
             MoneyChanged?.Invoke(Balance);
+            MoneyAdded?.Invoke(value);
         }
 
         public void SubMoney(int value)

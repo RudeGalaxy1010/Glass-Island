@@ -1,10 +1,9 @@
 using Agava.YandexGames;
-using System.Collections;
-using UnityEngine;
 using Lean.Localization;
-using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 namespace GlassIsland.Localization
 {
@@ -23,31 +22,38 @@ namespace GlassIsland.Localization
             yield break;
 #endif
 
-            if (PlayerPrefs.GetInt(Key, 0) == 1)
+            yield return new WaitUntil(() => YandexGamesSdk.IsInitialized);
+
+            int savedOption = PlayerPrefs.GetInt(Key, -1);
+
+            if (savedOption > -1)
             {
+                SelectLanguage(savedOption);
                 yield break;
             }
 
-            yield return new WaitUntil(() => YandexGamesSdk.IsInitialized);
+            SelectDetectedLanguage();
+        }
 
+        private void SelectDetectedLanguage()
+        {
             string language = YandexGamesSdk.Environment.i18n.lang;
             int option = 0;
 
-            switch(language)
+            switch (language)
             {
                 case "en":
-                case "En": option = 0;
+                    option = 0;
                     break;
                 case "ru":
-                case "RU": option = 1;
+                    option = 1;
                     break;
                 case "tr":
-                case "TR": option = 2;
+                    option = 2;
                     break;
             }
 
             SelectLanguage(option);
-            UpdateDropdown();
         }
 
         private void OnEnable()
@@ -71,13 +77,10 @@ namespace GlassIsland.Localization
         private void SelectLanguage(int option)
         {
             LeanLocalization.SetCurrentLanguageAll(LanguageNames[option]);
-            PlayerPrefs.SetInt(Key, 1);
-        }
-
-        private void UpdateDropdown()
-        {
-            _dropdown.value = LanguageNames.IndexOf(LeanLocalization.GetFirstCurrentLanguage());
+            _dropdown.value = option;
             _dropdown.RefreshShownValue();
+
+            PlayerPrefs.SetInt(Key, option);
         }
     }
 }

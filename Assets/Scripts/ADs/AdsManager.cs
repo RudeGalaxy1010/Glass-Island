@@ -7,25 +7,22 @@ namespace GlassIsland
 {
     public class AdsManager : MonoBehaviour
     {
-        private bool _inited;
-
         public IEnumerator Start()
         {
-            _inited = false;
-
 #if !UNITY_WEBGL || UNITY_EDITOR
             yield break;
 #endif
+            if (YandexGamesSdk.IsInitialized)
+            {
+                yield break;
+            }
 
             yield return YandexGamesSdk.Initialize();
-            _inited = true;
         }
-
-        public bool CanShowAds => _inited;
 
         public void ShowVideo(Action action)
         {
-            if (_inited == false)
+            if (YandexGamesSdk.IsInitialized == false)
             {
                 return;
             }
@@ -35,7 +32,7 @@ namespace GlassIsland
 
         public void ShowInterstitial()
         {
-            if (_inited == false)
+            if (YandexGamesSdk.IsInitialized == false)
             {
                 return;
             }
