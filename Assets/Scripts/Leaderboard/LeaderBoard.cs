@@ -10,13 +10,12 @@ namespace GlassIsland.LeaderBoard
     {
         private const string BoardName = "Money";
 
-        public event UnityAction NewRecordAdded;
+        public event UnityAction DataUpdated;
 
         [SerializeField] private Money _money;
 
         private int _score;
         private int _rank;
-        private string _playerName;
 
         private void OnEnable()
         {
@@ -40,14 +39,16 @@ namespace GlassIsland.LeaderBoard
             {
                 PlayerAccount.Authorize();
             }
+
+            UpdateData();
         }
 
         public int Rank => _rank;
         public int Score => _score;
-        public string PlayerName => _playerName;
 
         public void UpdateData()
         {
+            Debug.Log("Load data from LB!");
             if (PlayerAccount.IsAuthorized == false)
             {
                 return;
@@ -55,58 +56,44 @@ namespace GlassIsland.LeaderBoard
 
             Leaderboard.GetPlayerEntry(BoardName, (result) =>
             {
+                Debug.Log("Got result from LB!");
                 if (result == null)
                 {
                     _rank = 0;
                     _score = 0;
-                    _playerName = "-";
+                    SetScore(0);
+                    Debug.Log("Result from LB == null!");
                 }
                 else
                 {
-                    Debug.Log(result);
                     _rank = result.rank;
                     _score = result.score;
-
-                    if (string.IsNullOrEmpty(result.player.publicName))
-                    {
-                        _playerName = "-";
-                    }
-                    else
-                    {
-                        _playerName = result.player.publicName;
-                    }
+                    Debug.Log($"Result from LB: {result.rank} | {result.score}");
+                    Debug.Log($"Result from LB: {_rank} | {_score}");
                 }
+
+                DataUpdated?.Invoke();
             });
         }
 
         private void OnMoneyAdded(int value)
         {
-            int score = 0;
-
-            Leaderboard.GetEntries(BoardName, (result) =>
-            {
-                if (result == null)
-                {
-                    SetScore(0);
-                    return;
-                }
-
-                score = result.entries.Max(e => e.score);
-            });
-
-            score += value;
+            Debug.Log("Money added! Update LB!");
+            UpdateData();
+            int score = _score + value;
             SetScore(score);
         }
 
         private void SetScore(int score)
         {
+            Debug.Log($"Set score to {score}, update LB!");
             if (PlayerAccount.IsAuthorized == false)
             {
                 return;
             }
 
             Leaderboard.SetScore(BoardName, score);
-            NewRecordAdded?.Invoke();
+            UpdateData();
         }
     }
 }
