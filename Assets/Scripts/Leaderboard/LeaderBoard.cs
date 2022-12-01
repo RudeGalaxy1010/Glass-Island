@@ -1,7 +1,6 @@
 using Agava.YandexGames;
 using System.Collections;
 using UnityEngine;
-using System.Linq;
 using UnityEngine.Events;
 
 namespace GlassIsland.LeaderBoard
@@ -39,8 +38,6 @@ namespace GlassIsland.LeaderBoard
             {
                 PlayerAccount.Authorize();
             }
-
-            UpdateData();
         }
 
         public int Rank => _rank;
@@ -48,28 +45,23 @@ namespace GlassIsland.LeaderBoard
 
         public void UpdateData()
         {
-            Debug.Log("Load data from LB!");
-            if (PlayerAccount.IsAuthorized == false)
+            if (YandexGamesSdk.IsInitialized == false || PlayerAccount.IsAuthorized == false)
             {
                 return;
             }
 
             Leaderboard.GetPlayerEntry(BoardName, (result) =>
             {
-                Debug.Log("Got result from LB!");
                 if (result == null)
                 {
                     _rank = 0;
                     _score = 0;
                     SetScore(0);
-                    Debug.Log("Result from LB == null!");
                 }
                 else
                 {
                     _rank = result.rank;
                     _score = result.score;
-                    Debug.Log($"Result from LB: {result.rank} | {result.score}");
-                    Debug.Log($"Result from LB: {_rank} | {_score}");
                 }
 
                 DataUpdated?.Invoke();
@@ -78,22 +70,18 @@ namespace GlassIsland.LeaderBoard
 
         private void OnMoneyAdded(int value)
         {
-            Debug.Log("Money added! Update LB!");
-            UpdateData();
             int score = _score + value;
             SetScore(score);
         }
 
         private void SetScore(int score)
         {
-            Debug.Log($"Set score to {score}, update LB!");
             if (PlayerAccount.IsAuthorized == false)
             {
                 return;
             }
 
             Leaderboard.SetScore(BoardName, score);
-            UpdateData();
         }
     }
 }

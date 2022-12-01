@@ -10,6 +10,7 @@ namespace GlassIsland.Localization
     public class Language : MonoBehaviour
     {
         private const string Key = "lang";
+        private readonly List<string> LanguageShortNames = new List<string>() { "en", "ru", "tr" };
         private readonly List<string> LanguageNames = new List<string>() { "English", "Russian", "Turkish" };
 
         [SerializeField] private TMP_Dropdown _dropdown;
@@ -21,39 +22,24 @@ namespace GlassIsland.Localization
 #if !UNITY_WEBGL || UNITY_EDITOR
             yield break;
 #endif
-
             yield return new WaitUntil(() => YandexGamesSdk.IsInitialized);
 
-            int savedOption = PlayerPrefs.GetInt(Key, -1);
+            int languageOption = PlayerPrefs.GetInt(Key, -1);
 
-            if (savedOption > -1)
+            if (languageOption > -1)
             {
-                SelectLanguage(savedOption);
+                SelectLanguage(languageOption);
                 yield break;
             }
 
-            SelectDetectedLanguage();
+            languageOption = GetDetectedLanguageOption();
+            SelectLanguage(languageOption);
         }
 
-        private void SelectDetectedLanguage()
+        private int GetDetectedLanguageOption()
         {
             string language = YandexGamesSdk.Environment.i18n.lang;
-            int option = 0;
-
-            switch (language)
-            {
-                case "en":
-                    option = 0;
-                    break;
-                case "ru":
-                    option = 1;
-                    break;
-                case "tr":
-                    option = 2;
-                    break;
-            }
-
-            SelectLanguage(option);
+            return LanguageShortNames.IndexOf(language);
         }
 
         private void OnEnable()

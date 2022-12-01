@@ -22,6 +22,9 @@ namespace GlassIsland
 
         public void ShowVideo(Action action)
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            return;
+#endif
             if (YandexGamesSdk.IsInitialized == false)
             {
                 return;
@@ -32,6 +35,9 @@ namespace GlassIsland
 
         public void ShowInterstitial()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            return;
+#endif
             if (YandexGamesSdk.IsInitialized == false)
             {
                 return;
