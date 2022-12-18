@@ -18,11 +18,17 @@ namespace GlassIsland.LeaderBoard
 
         private void OnEnable()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            return;
+#endif
             _money.MoneyAdded += OnMoneyAdded;
         }
 
         private void OnDisable()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            return;
+#endif
             _money.MoneyAdded -= OnMoneyAdded;
         }
 
@@ -45,6 +51,9 @@ namespace GlassIsland.LeaderBoard
 
         public void UpdateData()
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            return;
+#endif
             if (YandexGamesSdk.IsInitialized == false || PlayerAccount.IsAuthorized == false)
             {
                 return;
